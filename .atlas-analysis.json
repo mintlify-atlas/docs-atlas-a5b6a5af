@@ -1,0 +1,107 @@
+{
+  "projectType": "saas",
+  "projectName": "FTB Hustle",
+  "projectDescription": "A platform for students to discover and track hackathons, grants, competitions, internships, and access premium learning toolkits.",
+  "theme": "almond",
+  "primaryColor": "#ea580c",
+  "lightColor": "#fb923c",
+  "darkColor": "#c2410c",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "authentication"
+            ]
+          },
+          {
+            "group": "Core Features",
+            "pages": [
+              "features/opportunities",
+              "features/internships",
+              "features/toolkits",
+              "features/tracker",
+              "features/ungatekeep"
+            ]
+          },
+          {
+            "group": "User Guides",
+            "pages": [
+              "guides/creating-opportunities",
+              "guides/bookmarking-and-tasks",
+              "guides/purchasing-toolkits",
+              "guides/profile-setup"
+            ]
+          },
+          {
+            "group": "Admin",
+            "pages": [
+              "admin/overview",
+              "admin/content-management",
+              "admin/coupon-system"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Developer",
+        "groups": [
+          {
+            "group": "Development",
+            "pages": [
+              "development/setup",
+              "development/architecture",
+              "development/tech-stack"
+            ]
+          },
+          {
+            "group": "API Reference",
+            "pages": [
+              "api/opportunities",
+              "api/internships",
+              "api/toolkits",
+              "api/user-management"
+            ]
+          },
+          {
+            "group": "Database",
+            "pages": [
+              "database/schema",
+              "database/migrations"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Opportunity Discovery (Hackathons, Grants, Competitions)",
+    "Internship Listings",
+    "Premium Learning Toolkits with Video Content",
+    "Task Tracker and Deadline Management",
+    "User Authentication with Google and LinkedIn",
+    "Bookmarking and Upvoting System",
+    "Payment Integration with Razorpay",
+    "Admin Content Management Panel",
+    "Ungatekeep Community Posts"
+  ],
+  "publicApiSurface": [
+    "GET /api/opportunities - List opportunities",
+    "POST /api/opportunities - Create opportunity",
+    "GET /api/opportunities/[id] - Get opportunity details",
+    "GET /api/internships - List internships",
+    "POST /api/internships - Create internship",
+    "GET /api/toolkits - List toolkits",
+    "GET /api/toolkits/[id]/content - Get toolkit content",
+    "POST /api/admin/users - Manage users",
+    "POST /api/admin/coupons - Manage coupons",
+    "GET /api/dashboard - User dashboard data",
+    "POST /api/tasks - Create task",
+    "GET /api/ungatekeep - List community posts"
+  ]
+}
