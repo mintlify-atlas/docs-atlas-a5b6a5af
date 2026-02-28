@@ -484,3 +484,225 @@ For validation errors from Zod:
   ]
 }
 ```
+
+## Upvote Opportunity
+
+### Get Upvote Status
+
+<CodeGroup>
+```bash GET /api/opportunities/{id}/upvote
+curl -X GET "https://ftbhustle.com/api/opportunities/550e8400-e29b-41d4-a716-446655440000/upvote" \
+  -H "Cookie: session=YOUR_SESSION_TOKEN"
+```
+</CodeGroup>
+
+Get the upvote count and whether the current user has upvoted this opportunity.
+
+#### Response
+
+<ResponseField name="count" type="number">
+  Total number of upvotes
+</ResponseField>
+
+<ResponseField name="userHasUpvoted" type="boolean">
+  Whether the current user has upvoted this opportunity
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "count": 42,
+  "userHasUpvoted": true
+}
+```
+</ResponseExample>
+
+### Toggle Upvote
+
+<CodeGroup>
+```bash POST /api/opportunities/{id}/upvote
+curl -X POST "https://ftbhustle.com/api/opportunities/550e8400-e29b-41d4-a716-446655440000/upvote" \
+  -H "Cookie: session=YOUR_SESSION_TOKEN"
+```
+</CodeGroup>
+
+Toggle the current user's upvote on an opportunity. If the user has already upvoted, this removes the upvote. If not, it adds an upvote.
+
+#### Response
+
+<ResponseField name="success" type="boolean">
+  Indicates if the toggle was successful
+</ResponseField>
+
+<ResponseField name="userHasUpvoted" type="boolean">
+  New upvote status for the current user
+</ResponseField>
+
+<ResponseField name="count" type="number">
+  Updated total upvote count
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "success": true,
+  "userHasUpvoted": true,
+  "count": 43
+}
+```
+</ResponseExample>
+
+## Comments
+
+### Get Comments
+
+<CodeGroup>
+```bash GET /api/opportunities/{id}/comments
+curl -X GET "https://ftbhustle.com/api/opportunities/550e8400-e29b-41d4-a716-446655440000/comments" \
+  -H "Cookie: session=YOUR_SESSION_TOKEN"
+```
+</CodeGroup>
+
+Retrieve all comments for an opportunity, ordered by newest first.
+
+#### Response
+
+<ResponseField name="comments" type="array">
+  Array of comment objects with user information
+  
+  <Expandable title="Comment Object">
+    <ResponseField name="id" type="string">
+      Unique comment identifier
+    </ResponseField>
+    
+    <ResponseField name="content" type="string">
+      Comment content (sanitized)
+    </ResponseField>
+    
+    <ResponseField name="createdAt" type="string">
+      Creation timestamp
+    </ResponseField>
+    
+    <ResponseField name="updatedAt" type="string">
+      Last update timestamp
+    </ResponseField>
+    
+    <ResponseField name="userId" type="string">
+      ID of the user who posted the comment
+    </ResponseField>
+    
+    <ResponseField name="opportunityId" type="string">
+      ID of the opportunity
+    </ResponseField>
+    
+    <ResponseField name="user" type="object">
+      User information
+      
+      <Expandable title="User Object">
+        <ResponseField name="id" type="string">
+          User ID
+        </ResponseField>
+        
+        <ResponseField name="name" type="string">
+          User's name
+        </ResponseField>
+        
+        <ResponseField name="image" type="string">
+          User's avatar URL
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Post Comment
+
+<CodeGroup>
+```bash POST /api/opportunities/{id}/comments
+curl -X POST "https://ftbhustle.com/api/opportunities/550e8400-e29b-41d4-a716-446655440000/comments" \
+  -H "Cookie: session=YOUR_SESSION_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "Great opportunity!"
+  }'
+```
+</CodeGroup>
+
+Post a new comment on an opportunity. Comments are automatically sanitized to remove HTML/script tags.
+
+#### Request Body
+
+<ParamField body="content" type="string" required>
+  Comment content (1-1000 characters). HTML tags and scripts will be stripped.
+</ParamField>
+
+#### Response
+
+<ResponseField name="comment" type="object">
+  The created comment with user information
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "comment": {
+    "id": "comment-uuid",
+    "content": "Great opportunity!",
+    "createdAt": "2024-03-15T14:30:00Z",
+    "updatedAt": "2024-03-15T14:30:00Z",
+    "userId": "user123",
+    "opportunityId": "550e8400-e29b-41d4-a716-446655440000",
+    "user": {
+      "id": "user123",
+      "name": "John Doe",
+      "image": "https://example.com/avatar.jpg"
+    }
+  },
+  "message": "Comment posted successfully"
+}
+```
+</ResponseExample>
+
+### Delete Comment
+
+<CodeGroup>
+```bash DELETE /api/opportunities/{id}/comments/{commentId}
+curl -X DELETE "https://ftbhustle.com/api/opportunities/550e8400-e29b-41d4-a716-446655440000/comments/comment-uuid" \
+  -H "Cookie: session=YOUR_SESSION_TOKEN"
+```
+</CodeGroup>
+
+Delete a comment. Only the comment author can delete their own comments.
+
+#### Path Parameters
+
+<ParamField path="id" type="string" required>
+  Opportunity ID
+</ParamField>
+
+<ParamField path="commentId" type="string" required>
+  Comment ID to delete
+</ParamField>
+
+#### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "message": "Comment deleted successfully"
+}
+```
+</ResponseExample>
+
+#### Error Responses
+
+- **401 Unauthorized**: User is not authenticated
+- **404 Not Found**: Comment not found or user doesn't have permission to delete it
