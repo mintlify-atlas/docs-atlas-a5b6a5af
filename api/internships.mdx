@@ -1,0 +1,594 @@
+---
+title: "Internships API"
+description: "API endpoints for managing internship listings with filtering, search, and CRUD operations"
+---
+
+The Internships API allows you to create, retrieve, update, and delete internship listings on FTB Hustle.
+
+## Authentication
+
+Most internship endpoints require authentication:
+
+- **GET /api/internships**: Public endpoint (optional authentication for admin features)
+- **GET /api/internships/{id}**: Public endpoint
+- **POST /api/internships**: Requires authentication (ingest user)
+- **PUT /api/internships/{id}**: Requires authentication (owner or admin)
+- **DELETE /api/internships/{id}**: Requires authentication (owner or admin)
+
+## List Internships
+
+<CodeGroup>
+```bash GET /api/internships
+curl -X GET "https://ftbhustle.com/api/internships?limit=10&offset=0&type=remote"
+```
+</CodeGroup>
+
+Retrieve a paginated list of internships with optional filtering.
+
+### Query Parameters
+
+<ParamField query="limit" type="number" default="10">
+  Number of internships to return per page
+</ParamField>
+
+<ParamField query="offset" type="number" default="0">
+  Number of internships to skip for pagination
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search term to filter by title, description, or hiring organization
+</ParamField>
+
+<ParamField query="types" type="string">
+  Comma-separated list of internship types: `remote`, `hybrid`, `onsite`
+</ParamField>
+
+<ParamField query="tags" type="string">
+  Comma-separated list of tags to filter by (case-insensitive)
+</ParamField>
+
+<ParamField query="location" type="string">
+  Filter by location (partial match)
+</ParamField>
+
+<ParamField query="minStipend" type="number">
+  Minimum stipend amount in rupees
+</ParamField>
+
+<ParamField query="maxStipend" type="number">
+  Maximum stipend amount in rupees
+</ParamField>
+
+### Response
+
+<ResponseField name="success" type="boolean">
+  Indicates if the request was successful
+</ResponseField>
+
+<ResponseField name="internships" type="array">
+  Array of internship objects
+  
+  <Expandable title="Internship Object">
+    <ResponseField name="id" type="string">
+      Unique identifier for the internship
+    </ResponseField>
+    
+    <ResponseField name="title" type="string">
+      Internship title
+    </ResponseField>
+    
+    <ResponseField name="description" type="string">
+      Detailed description of the internship
+    </ResponseField>
+    
+    <ResponseField name="type" type="string">
+      Type of work: `remote`, `hybrid`, or `onsite`
+    </ResponseField>
+    
+    <ResponseField name="timing" type="string">
+      Work timing: `full_time` or `part_time`
+    </ResponseField>
+    
+    <ResponseField name="link" type="string">
+      Application link URL
+    </ResponseField>
+    
+    <ResponseField name="tags" type="array">
+      Array of tag strings
+    </ResponseField>
+    
+    <ResponseField name="stipend" type="number">
+      Monthly stipend amount in rupees
+    </ResponseField>
+    
+    <ResponseField name="duration" type="string">
+      Duration of the internship (e.g., "3 months", "6 months")
+    </ResponseField>
+    
+    <ResponseField name="experience" type="string">
+      Required experience level
+    </ResponseField>
+    
+    <ResponseField name="location" type="string">
+      Location of the internship
+    </ResponseField>
+    
+    <ResponseField name="deadline" type="string">
+      Application deadline in YYYY-MM-DD format
+    </ResponseField>
+    
+    <ResponseField name="hiringOrganization" type="string">
+      Name of the hiring organization
+    </ResponseField>
+    
+    <ResponseField name="hiringManager" type="string">
+      Name of the hiring manager
+    </ResponseField>
+    
+    <ResponseField name="isVerified" type="boolean">
+      Whether the internship has been verified
+    </ResponseField>
+    
+    <ResponseField name="isActive" type="boolean">
+      Whether the internship is active
+    </ResponseField>
+    
+    <ResponseField name="userId" type="string">
+      ID of the user who created the internship
+    </ResponseField>
+    
+    <ResponseField name="user" type="object">
+      User information
+      
+      <Expandable title="User Object">
+        <ResponseField name="id" type="string">
+          User ID
+        </ResponseField>
+        <ResponseField name="name" type="string">
+          User name
+        </ResponseField>
+        <ResponseField name="image" type="string">
+          User profile image URL
+        </ResponseField>
+        <ResponseField name="role" type="string">
+          User role
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="createdAt" type="string">
+      Creation timestamp (ISO 8601 format)
+    </ResponseField>
+    
+    <ResponseField name="updatedAt" type="string">
+      Last update timestamp (ISO 8601 format)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  Pagination metadata
+  
+  <Expandable title="Pagination Object">
+    <ResponseField name="limit" type="number">
+      Number of items per page
+    </ResponseField>
+    
+    <ResponseField name="offset" type="number">
+      Current offset
+    </ResponseField>
+    
+    <ResponseField name="total" type="number">
+      Approximate total count
+    </ResponseField>
+    
+    <ResponseField name="hasMore" type="boolean">
+      Whether there are more internships to fetch
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "success": true,
+  "internships": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440001",
+      "title": "Software Engineering Intern",
+      "description": "Join our team to build scalable web applications",
+      "type": "remote",
+      "timing": "full_time",
+      "link": "https://example.com/apply",
+      "tags": ["web development", "react", "nodejs"],
+      "stipend": 25000,
+      "duration": "6 months",
+      "experience": "0-1 years",
+      "location": "Remote",
+      "deadline": "2024-06-30",
+      "hiringOrganization": "TechCorp India",
+      "hiringManager": "Jane Smith",
+      "isVerified": true,
+      "isActive": true,
+      "userId": "user123",
+      "user": {
+        "id": "user123",
+        "name": "John Doe",
+        "image": "https://example.com/avatar.jpg",
+        "role": "member"
+      },
+      "createdAt": "2024-03-01T10:00:00Z",
+      "updatedAt": "2024-03-01T10:00:00Z"
+    }
+  ],
+  "pagination": {
+    "limit": 10,
+    "offset": 0,
+    "total": 245,
+    "hasMore": true
+  }
+}
+```
+</ResponseExample>
+
+## Get Single Internship
+
+<CodeGroup>
+```bash GET /api/internships/{id}
+curl -X GET "https://ftbhustle.com/api/internships/550e8400-e29b-41d4-a716-446655440001"
+```
+</CodeGroup>
+
+Retrieve detailed information about a specific internship.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the internship
+</ParamField>
+
+### Response
+
+<ResponseField name="success" type="boolean">
+  Indicates if the request was successful
+</ResponseField>
+
+<ResponseField name="internship" type="object">
+  The internship object with all details
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "success": true,
+  "internship": {
+    "id": "550e8400-e29b-41d4-a716-446655440001",
+    "title": "Software Engineering Intern",
+    "description": "Join our team to build scalable web applications",
+    "type": "remote",
+    "timing": "full_time",
+    "link": "https://example.com/apply",
+    "tags": ["web development", "react", "nodejs"],
+    "location": "Remote",
+    "deadline": "2024-06-30",
+    "stipend": 25000,
+    "hiringOrganization": "TechCorp India",
+    "hiringManager": "Jane Smith",
+    "experience": "0-1 years",
+    "duration": "6 months",
+    "createdAt": "2024-03-01T10:00:00Z",
+    "updatedAt": "2024-03-01T10:00:00Z",
+    "isVerified": true,
+    "isActive": true,
+    "userId": "user123",
+    "user": {
+      "id": "user123",
+      "name": "John Doe",
+      "image": "https://example.com/avatar.jpg",
+      "role": "member"
+    }
+  }
+}
+```
+</ResponseExample>
+
+## Create Internship
+
+<CodeGroup>
+```bash POST /api/internships
+curl -X POST "https://ftbhustle.com/api/internships" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Data Science Intern",
+    "description": "Work on machine learning projects",
+    "type": "hybrid",
+    "timing": "full_time",
+    "link": "https://example.com/apply",
+    "hiringOrganization": "DataCorp",
+    "tags": ["machine learning", "python", "data analysis"],
+    "stipend": 30000,
+    "duration": "6 months",
+    "location": "Bangalore, India",
+    "deadline": "2024-07-15"
+  }'
+```
+</CodeGroup>
+
+Create a new internship listing. This endpoint supports both single and batch creation.
+
+### Request Body
+
+For single internship:
+
+<ParamField body="title" type="string" required>
+  Internship title
+</ParamField>
+
+<ParamField body="link" type="string" required>
+  Application link URL
+</ParamField>
+
+<ParamField body="hiringOrganization" type="string" required>
+  Name of the hiring organization
+</ParamField>
+
+<ParamField body="description" type="string">
+  Detailed description
+</ParamField>
+
+<ParamField body="type" type="string">
+  Work type: `remote`, `hybrid`, or `onsite`
+</ParamField>
+
+<ParamField body="timing" type="string">
+  Work timing: `full_time` or `part_time`
+</ParamField>
+
+<ParamField body="tags" type="array">
+  Array of tag strings
+</ParamField>
+
+<ParamField body="stipend" type="number">
+  Monthly stipend in rupees
+</ParamField>
+
+<ParamField body="duration" type="string">
+  Duration (e.g., "3 months", "6 months")
+</ParamField>
+
+<ParamField body="experience" type="string">
+  Required experience level
+</ParamField>
+
+<ParamField body="location" type="string">
+  Location
+</ParamField>
+
+<ParamField body="deadline" type="string">
+  Application deadline (ISO 8601 format or YYYY-MM-DD)
+</ParamField>
+
+<ParamField body="hiringManager" type="string">
+  Hiring manager name
+</ParamField>
+
+### Batch Creation
+
+To create multiple internships at once, send an array of internship objects:
+
+```json
+[
+  { "title": "Internship 1", ... },
+  { "title": "Internship 2", ... }
+]
+```
+
+### Response
+
+<ResponseField name="success" type="boolean">
+  Indicates if the creation was successful
+</ResponseField>
+
+<ResponseField name="count" type="number">
+  Number of internships created
+</ResponseField>
+
+<ResponseField name="data" type="object | array">
+  The created internship object(s)
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "success": true,
+  "count": 1,
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440002",
+    "title": "Data Science Intern",
+    "description": "Work on machine learning projects",
+    "type": "hybrid",
+    "timing": "full_time",
+    "link": "https://example.com/apply",
+    "tags": ["machine learning", "python", "data analysis"],
+    "stipend": 30000,
+    "duration": "6 months",
+    "experience": null,
+    "location": "Bangalore, India",
+    "deadline": "2024-07-15",
+    "hiringOrganization": "DataCorp",
+    "hiringManager": null,
+    "isVerified": false,
+    "isActive": true,
+    "createdAt": "2024-03-15T14:30:00Z",
+    "updatedAt": "2024-03-15T14:30:00Z",
+    "deletedAt": null,
+    "userId": "ingest-user-id"
+  }
+}
+```
+</ResponseExample>
+
+## Update Internship
+
+<CodeGroup>
+```bash PUT /api/internships/{id}
+curl -X PUT "https://ftbhustle.com/api/internships/550e8400-e29b-41d4-a716-446655440001" \
+  -H "Cookie: session=YOUR_SESSION_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Updated Software Engineering Intern",
+    "stipend": 30000,
+    "isActive": true
+  }'
+```
+</CodeGroup>
+
+Update an existing internship. Only the owner or admin can update internships.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the internship to update
+</ParamField>
+
+### Request Body
+
+All fields are optional. Only provided fields will be updated.
+
+<ParamField body="title" type="string">
+  Internship title
+</ParamField>
+
+<ParamField body="description" type="string">
+  Description
+</ParamField>
+
+<ParamField body="type" type="string">
+  Work type: `remote`, `hybrid`, or `onsite`
+</ParamField>
+
+<ParamField body="timing" type="string">
+  Work timing: `full_time` or `part_time`
+</ParamField>
+
+<ParamField body="link" type="string">
+  Application link URL
+</ParamField>
+
+<ParamField body="tags" type="array">
+  Array of tag strings
+</ParamField>
+
+<ParamField body="location" type="string">
+  Location
+</ParamField>
+
+<ParamField body="deadline" type="string">
+  Application deadline
+</ParamField>
+
+<ParamField body="stipend" type="number">
+  Monthly stipend
+</ParamField>
+
+<ParamField body="hiringOrganization" type="string">
+  Hiring organization
+</ParamField>
+
+<ParamField body="hiringManager" type="string">
+  Hiring manager
+</ParamField>
+
+<ParamField body="experience" type="string">
+  Required experience
+</ParamField>
+
+<ParamField body="duration" type="string">
+  Duration
+</ParamField>
+
+<ParamField body="isVerified" type="boolean">
+  Verification status (admin only)
+</ParamField>
+
+<ParamField body="isActive" type="boolean">
+  Active status (admin only)
+</ParamField>
+
+### Response
+
+<ResponseField name="success" type="boolean">
+  Indicates if the update was successful
+</ResponseField>
+
+<ResponseField name="internship" type="object">
+  The updated internship object
+</ResponseField>
+
+### Error Responses
+
+- **401 Unauthorized**: User is not authenticated
+- **403 Forbidden**: User doesn't have permission to edit this internship
+- **404 Not Found**: Internship not found
+- **400 Bad Request**: Validation error
+
+## Delete Internship
+
+<CodeGroup>
+```bash DELETE /api/internships/{id}
+curl -X DELETE "https://ftbhustle.com/api/internships/550e8400-e29b-41d4-a716-446655440001" \
+  -H "Cookie: session=YOUR_SESSION_TOKEN"
+```
+</CodeGroup>
+
+Soft delete an internship. Only the owner or admin can delete internships.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the internship to delete
+</ParamField>
+
+### Response
+
+<ResponseField name="success" type="boolean">
+  Indicates if the deletion was successful
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "success": true
+}
+```
+</ResponseExample>
+
+### Error Responses
+
+- **401 Unauthorized**: User is not authenticated
+- **403 Forbidden**: User doesn't have permission to delete this internship
+- **404 Not Found**: Internship not found
+
+## Error Handling
+
+All API endpoints return appropriate HTTP status codes and error messages:
+
+```json Error Response Example
+{
+  "error": "Failed to fetch internships"
+}
+```
+
+For validation errors:
+
+```json Validation Error Response
+{
+  "error": [
+    {
+      "code": "invalid_type",
+      "path": ["title"],
+      "message": "Title is required"
+    }
+  ]
+}
+```

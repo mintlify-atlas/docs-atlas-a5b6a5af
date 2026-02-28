@@ -1,0 +1,128 @@
+---
+title: Admin Panel Overview
+description: Access and navigate the FTB Hustle admin dashboard to manage platform content and users
+---
+
+## What is the Admin Panel?
+
+The Admin Panel is a powerful dashboard that allows administrators to manage all aspects of the FTB Hustle platform. It provides centralized control over user management, content moderation, toolkit catalog, coupons, and broadcast posts.
+
+## Accessing the Admin Panel
+
+The admin panel is only accessible to users with the **admin** role.
+
+### Access Requirements
+
+- Must be logged in with a verified account
+- User role must be set to `admin` in the database
+- Available at `/admin` route
+
+<Note>
+Only users with the `admin` role can access the admin panel. Attempting to access this page with `user` or `member` roles will redirect to the homepage.
+</Note>
+
+### User Roles in FTB Hustle
+
+FTB Hustle has three user role levels:
+
+<CardGroup cols={3}>
+  <Card title="User" icon="user">
+    Default role for all new users. Can create opportunities, internships, and engage with platform content.
+  </Card>
+  <Card title="Member" icon="users">
+    Enhanced permissions for trusted community members. Can access exclusive features and content.
+  </Card>
+  <Card title="Admin" icon="shield">
+    Full platform access. Can manage all users, content, toolkits, coupons, and site settings.
+  </Card>
+</CardGroup>
+
+## Admin Dashboard Sections
+
+The admin panel is organized into five main tabs:
+
+<CardGroup cols={2}>
+  <Card title="Pending Opportunities" icon="circle-check" href="/admin/content-management#opportunities">
+    Review and approve or reject opportunities submitted by users
+  </Card>
+  <Card title="User Management" icon="users-gear" href="/admin/content-management#users">
+    Manage user accounts and assign roles (user, member, admin)
+  </Card>
+  <Card title="Toolkit Management" icon="book" href="/admin/content-management#toolkits">
+    Create and manage paid toolkits with lessons and content
+  </Card>
+  <Card title="Coupons" icon="ticket" href="/admin/coupon-system">
+    Create and manage discount coupons for toolkit purchases
+  </Card>
+  <Card title="Ungatekeep" icon="broadcast-tower" href="/admin/content-management#ungatekeep">
+    Manage announcements, resources, and company experience posts
+  </Card>
+</CardGroup>
+
+## Navigation
+
+The admin dashboard features:
+
+- **Tab-based navigation**: Switch between different management sections using the tab bar
+- **Search and filters**: Quickly find specific items in tables
+- **Action buttons**: Create new content or perform bulk operations
+- **Real-time updates**: Changes reflect immediately across the platform
+
+## Source Code Location
+
+```bash
+# Admin page and components
+app/admin/page.tsx
+app/admin/AdminTabs.tsx
+app/admin/Admin*Table.tsx
+
+# Admin API routes
+app/api/admin/*/route.ts
+
+# User role enum
+lib/schema.ts (userRoleEnum)
+```
+
+## Quick Actions
+
+<Steps>
+  <Step title="Access the Admin Panel">
+    Navigate to `/admin` in your browser. You'll be redirected to login if not authenticated.
+  </Step>
+  <Step title="Select a Section">
+    Use the tab bar to switch between Opportunities, Users, Toolkits, Coupons, and Ungatekeep.
+  </Step>
+  <Step title="Perform Actions">
+    Use the action buttons, switches, and dropdown menus to manage content.
+  </Step>
+  <Step title="Monitor Changes">
+    All changes are reflected immediately. Use the refresh button if needed.
+  </Step>
+</Steps>
+
+## Admin Dashboard Features
+
+### Statistics Display
+
+Each section shows relevant statistics:
+- Total count of items (users, opportunities, toolkits, coupons, posts)
+- Pending requests count
+- Active/inactive status summaries
+
+### Bulk Operations
+
+Perform actions on multiple items:
+- Approve/reject multiple opportunities
+- Update user roles in batches
+- Toggle toolkit or coupon activation status
+
+### Search and Filtering
+
+Every data table includes:
+- Search bar to filter by name, title, or code
+- Column sorting (ascending/descending)
+- Pagination for large datasets
+
+<Warning>
+Admin actions are powerful and can affect the entire platform. Always verify your changes before confirming destructive operations like deletes or role changes.
+</Warning>

@@ -1,0 +1,692 @@
+---
+title: Database Schema
+description: Complete database schema reference for FTB Hustle including all tables, fields, and relationships
+---
+
+# Database Schema
+
+FTB Hustle uses PostgreSQL with Drizzle ORM for type-safe database operations. The schema is defined in `lib/schema.ts` and includes tables for users, opportunities, mentorships, toolkits, and more.
+
+## Overview
+
+The database schema is organized into the following categories:
+
+- **Authentication & Users**: Core user management and authentication
+- **Opportunities & Internships**: Job and opportunity listings
+- **Mentorship**: Mentor profiles and related data
+- **Toolkits & Monetization**: Premium content and payment processing
+- **Community**: User interactions, feedback, and content
+- **Tracking**: Application tracking and calendar events
+
+## Enums
+
+The schema defines several enums for type safety:
+
+```typescript
+// User roles
+export const userRoleEnum = pgEnum("user_role", ["user", "member", "admin"]);
+
+// User persona types
+export const personaEnum = pgEnum("persona_type", ["student", "society"]);
+
+// Opportunity types
+export const opportunityTypeEnum = pgEnum("opportunity_type", [
+  "hackathon",
+  "grant",
+  "competition",
+  "ideathon",
+]);
+
+// Toolkit content types
+export const toolkitContentItemTypeEnum = pgEnum("toolkit_content_item_type", [
+  "article",
+  "video",
+]);
+
+// Ungatekeep post tags
+export const ungatekeepTagEnum = pgEnum("ungatekeep_tag", [
+  "announcement",
+  "company_experience",
+  "resources",
+]);
+```
+
+## Tables
+
+<Accordion>
+  <AccordionItem title="Authentication & Users">
+    
+### user
+
+Core user table storing user profiles and authentication data.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `text` | Primary key |
+| `name` | `text` | User's full name (required) |
+| `email` | `text` | Unique email address (required) |
+| `emailVerified` | `boolean` | Email verification status (default: false) |
+| `image` | `text` | Profile image URL |
+| `fieldInterests` | `text[]` | Array of field interests |
+| `opportunityInterests` | `text[]` | Array of opportunity interests |
+| `dateOfBirth` | `date` | User's date of birth |
+| `collegeInstitute` | `text` | College or institution name |
+| `contactNumber` | `text` | Phone number |
+| `currentRole` | `text` | Current role/position |
+| `role` | `userRoleEnum` | User role (default: "user") |
+| `createdAt` | `timestamp` | Account creation timestamp |
+| `updatedAt` | `timestamp` | Last update timestamp |
+| `deletedAt` | `timestamp` | Soft delete timestamp |
+
+**Relationships:**
+- One-to-many with `session`, `account`, `mentors`, `opportunities`, `internships`, `comments`, `bookmarks`, `tasks`, `toolkits`, `userToolkits`, `userToolkitProgress`, `ungatekeepPosts`, `trackerItems`, `trackerEvents`
+
+---
+
+### userOnboardingProfiles
+
+Stores detailed onboarding information for new users.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `uuid` | Primary key |
+| `userId` | `text` | Foreign key to user (required) |
+| `persona` | `personaEnum` | User persona type (required) |
+| `locationType` | `text` | Type of location |
+| `locationValue` | `text` | Location value |
+| `educationLevel` | `text` | Education level |
+| `fieldOfStudy` | `text` | Field of study |
+| `fieldOther` | `text` | Other field (if not in list) |
+| `opportunityInterests` | `text[]` | Opportunity interests array |
+| `domainPreferences` | `text[]` | Domain preferences array |
+| `struggles` | `text[]` | User struggles array |
+| `createdAt` | `timestamp` | Creation timestamp |
+| `updatedAt` | `timestamp` | Last update timestamp |
+
+**Relationships:**
+- Many-to-one with `user`
+- Unique constraint on `userId`
+
+---
+
+### session
+
+Stores active user sessions for authentication.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `text` | Primary key |
+| `expiresAt` | `timestamp` | Session expiration (required) |
+| `token` | `text` | Unique session token (required) |
+| `createdAt` | `timestamp` | Session creation (required) |
+| `updatedAt` | `timestamp` | Last update (required) |
+| `ipAddress` | `text` | User's IP address |
+| `userAgent` | `text` | User's browser/client info |
+| `userId` | `text` | Foreign key to user (required) |
+
+**Relationships:**
+- Many-to-one with `user` (cascade delete)
+
+---
+
+### account
+
+Stores OAuth provider accounts linked to users.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `text` | Primary key |
+| `accountId` | `text` | Provider account ID (required) |
+| `providerId` | `text` | OAuth provider ID (required) |
+| `userId` | `text` | Foreign key to user (required) |
+| `accessToken` | `text` | OAuth access token |
+| `refreshToken` | `text` | OAuth refresh token |
+| `idToken` | `text` | OAuth ID token |
+| `accessTokenExpiresAt` | `timestamp` | Access token expiration |
+| `refreshTokenExpiresAt` | `timestamp` | Refresh token expiration |
+| `scope` | `text` | OAuth scope |
+| `password` | `text` | Hashed password (for credential provider) |
+| `createdAt` | `timestamp` | Account creation (required) |
+| `updatedAt` | `timestamp` | Last update (required) |
+
+**Relationships:**
+- Many-to-one with `user` (cascade delete)
+
+---
+
+### verification
+
+Stores verification tokens for email verification and password resets.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `text` | Primary key |
+| `identifier` | `text` | Identifier (email/phone) (required) |
+| `value` | `text` | Verification token (required) |
+| `expiresAt` | `timestamp` | Token expiration (required) |
+| `createdAt` | `timestamp` | Creation timestamp |
+| `updatedAt` | `timestamp` | Last update timestamp |
+
+  </AccordionItem>
+
+  <AccordionItem title="Opportunities & Internships">
+
+### opportunities
+
+Stores hackathons, competitions, grants, and other opportunities.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `uuid` | Primary key |
+| `type` | `opportunityTypeEnum` | Opportunity type (required) |
+| `title` | `text` | Opportunity title (required) |
+| `description` | `text` | Detailed description (required) |
+| `images` | `text[]` | Array of image URLs |
+| `tagIds` | `uuid[]` | Array of tag IDs |
+| `location` | `text` | Event location |
+| `organiserInfo` | `text` | Organizer information |
+| `startDate` | `date` | Start date |
+| `endDate` | `date` | End date |
+| `isFlagged` | `boolean` | Flagged for review (default: false) |
+| `publishAt` | `timestamp` | Scheduled publish time |
+| `isVerified` | `boolean` | Verification status (default: false) |
+| `isActive` | `boolean` | Active status (default: true) |
+| `upvoterIds` | `text[]` | Array of user IDs who upvoted |
+| `upvoteCount` | `integer` | Total upvote count (default: 0) |
+| `userId` | `text` | Foreign key to user (required) |
+| `createdAt` | `timestamp` | Creation timestamp |
+| `updatedAt` | `timestamp` | Last update timestamp |
+| `deletedAt` | `timestamp` | Soft delete timestamp |
+
+**Relationships:**
+- Many-to-one with `user` (cascade delete)
+- One-to-many with `comments`, `bookmarks`, `trackerItems`
+
+---
+
+### internships
+
+Stores internship and job listings.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `uuid` | Primary key |
+| `title` | `text` | Job title (required) |
+| `description` | `text` | Job description |
+| `type` | `text` | Job type (internship, full-time, etc.) |
+| `timing` | `text` | Working hours/schedule |
+| `link` | `text` | Application link (required) |
+| `tags` | `text[]` | Skills/technology tags |
+| `stipend` | `integer` | Stipend amount |
+| `duration` | `text` | Duration (e.g., "3 months") |
+| `experience` | `text` | Required experience |
+| `location` | `text` | Job location |
+| `deadline` | `date` | Application deadline |
+| `hiringOrganization` | `text` | Company name (required) |
+| `hiringManager` | `text` | Hiring manager name |
+| `isVerified` | `boolean` | Verification status (default: false) |
+| `isActive` | `boolean` | Active status (default: true) |
+| `userId` | `text` | Foreign key to user (required) |
+| `createdAt` | `timestamp` | Creation timestamp |
+| `updatedAt` | `timestamp` | Last update timestamp |
+| `deletedAt` | `timestamp` | Soft delete timestamp |
+
+**Relationships:**
+- Many-to-one with `user` (cascade delete)
+- One-to-many with `trackerItems`
+
+---
+
+### comments
+
+User comments on opportunities.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `uuid` | Primary key |
+| `content` | `text` | Comment content (required) |
+| `userId` | `text` | Foreign key to user (required) |
+| `opportunityId` | `uuid` | Foreign key to opportunity (required) |
+| `createdAt` | `timestamp` | Creation timestamp |
+| `updatedAt` | `timestamp` | Last update timestamp |
+
+**Relationships:**
+- Many-to-one with `user` (cascade delete)
+- Many-to-one with `opportunities` (cascade delete)
+
+---
+
+### bookmarks
+
+User bookmarks for opportunities.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `uuid` | Primary key |
+| `userId` | `text` | Foreign key to user (required) |
+| `opportunityId` | `uuid` | Foreign key to opportunity (required) |
+| `createdAt` | `timestamp` | Creation timestamp |
+
+**Relationships:**
+- Many-to-one with `user` (cascade delete)
+- Many-to-one with `opportunities` (cascade delete)
+- Unique constraint on `userId` + `opportunityId`
+
+---
+
+### tags
+
+Tags for autosuggest and filtering.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `uuid` | Primary key |
+| `name` | `text` | Unique tag name (required) |
+| `createdAt` | `timestamp` | Creation timestamp |
+
+  </AccordionItem>
+
+  <AccordionItem title="Mentorship">
+
+### mentors
+
+Mentor profiles and information.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `uuid` | Primary key |
+| `mentorName` | `text` | Mentor's name (required) |
+| `mentorNumber` | `text` | Contact number |
+| `mentorImage` | `text` | Profile image URL |
+| `description` | `text` | Mentor bio/description |
+| `mentorEmail` | `text` | Contact email (required) |
+| `isVerified` | `boolean` | Verification status (default: false) |
+| `tags` | `text[]` | Expertise tags |
+| `calLink` | `text` | Calendar booking link |
+| `rating` | `integer` | Average rating |
+| `availability` | `boolean` | Currently available (default: true) |
+| `userId` | `text` | Foreign key to user (required) |
+| `createdAt` | `timestamp` | Creation timestamp |
+| `updatedAt` | `timestamp` | Last update timestamp |
+
+**Relationships:**
+- Many-to-one with user (cascade delete)
+
+---
+
+  </AccordionItem>
+
+  <AccordionItem title="Toolkits & Monetization">
+
+### toolkits
+
+Premium content packages for purchase.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `uuid` | Primary key |
+| `title` | `text` | Toolkit title (required) |
+| `description` | `text` | Toolkit description (required) |
+| `price` | `integer` | Price in rupees (required) |
+| `originalPrice` | `integer` | Original price for discounts |
+| `coverImageUrl` | `text` | Cover image URL |
+| `videoUrl` | `text` | YouTube promo video URL |
+| `contentUrl` | `text` | Legacy content page URL |
+| `category` | `text` | Category for filtering |
+| `highlights` | `text[]` | Feature highlights |
+| `totalDuration` | `text` | Total duration (e.g., "2h 30m") |
+| `lessonCount` | `integer` | Number of lessons (default: 0) |
+| `isActive` | `boolean` | Active status (default: false) |
+| `showSaleBadge` | `boolean` | Show sale badge (default: false) |
+| `userId` | `text` | Foreign key to creator (required) |
+| `createdAt` | `timestamp` | Creation timestamp |
+| `updatedAt` | `timestamp` | Last update timestamp |
+
+**Relationships:**
+- Many-to-one with `user` (cascade delete)
+- One-to-many with `toolkitContentItems`, `userToolkits`, `userToolkitProgress`
+
+---
+
+### toolkitContentItems
+
+Individual lessons/articles within a toolkit.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `uuid` | Primary key |
+| `toolkitId` | `uuid` | Foreign key to toolkit (required) |
+| `title` | `text` | Content title (required) |
+| `type` | `toolkitContentItemTypeEnum` | Content type (required) |
+| `content` | `text` | HTML content for articles |
+| `bunnyVideoUrl` | `text` | Bunny CDN video URL |
+| `orderIndex` | `integer` | Display order (default: 0) |
+| `createdAt` | `timestamp` | Creation timestamp |
+| `updatedAt` | `timestamp` | Last update timestamp |
+
+**Relationships:**
+- Many-to-one with `toolkits` (cascade delete)
+- One-to-many with `userToolkitProgress`
+
+---
+
+### userToolkits
+
+Tracks toolkit purchases by users.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `uuid` | Primary key |
+| `userId` | `text` | Foreign key to user (required) |
+| `toolkitId` | `uuid` | Foreign key to toolkit (required) |
+| `purchaseDate` | `timestamp` | Purchase timestamp |
+| `razorpayOrderId` | `text` | Razorpay order ID |
+| `paymentId` | `text` | Razorpay payment ID |
+| `paymentStatus` | `text` | Status: "pending", "completed", "failed" |
+| `amountPaid` | `integer` | Actual amount paid |
+| `couponId` | `uuid` | Foreign key to coupon used |
+| `createdAt` | `timestamp` | Creation timestamp |
+
+**Relationships:**
+- Many-to-one with `user` (cascade delete)
+- Many-to-one with `toolkits` (cascade delete)
+- Many-to-one with `coupons` (set null on delete)
+
+---
+
+### userToolkitProgress
+
+Tracks user progress through toolkit content.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `uuid` | Primary key |
+| `userId` | `text` | Foreign key to user (required) |
+| `toolkitId` | `uuid` | Foreign key to toolkit (required) |
+| `contentItemId` | `uuid` | Foreign key to content item (required) |
+| `completedAt` | `timestamp` | Completion timestamp |
+
+**Relationships:**
+- Many-to-one with `user` (cascade delete)
+- Many-to-one with `toolkits` (cascade delete)
+- Many-to-one with `toolkitContentItems` (cascade delete)
+- Unique constraint on `userId` + `contentItemId`
+
+---
+
+### coupons
+
+Discount coupons for toolkit purchases.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `uuid` | Primary key |
+| `code` | `text` | Unique coupon code (required) |
+| `discountAmount` | `integer` | Fixed discount in rupees (required) |
+| `maxUses` | `integer` | Total usage limit (null = unlimited) |
+| `maxUsesPerUser` | `integer` | Per-user limit (default: 1) |
+| `currentUses` | `integer` | Current usage count (default: 0) |
+| `isActive` | `boolean` | Active status (default: true) |
+| `expiresAt` | `timestamp` | Expiration timestamp |
+| `createdAt` | `timestamp` | Creation timestamp |
+
+---
+
+### banners
+
+Promotional banners displayed on the site.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `uuid` | Primary key |
+| `title` | `text` | Banner title (required) |
+| `subtitle` | `text` | Banner subtitle |
+| `background` | `text` | CSS background property |
+| `imageUrl` | `text` | Background image URL |
+| `link` | `text` | Click-through link |
+| `priority` | `integer` | Display order (default: 0) |
+| `isActive` | `boolean` | Active status (default: true) |
+| `createdAt` | `timestamp` | Creation timestamp |
+| `updatedAt` | `timestamp` | Last update timestamp |
+
+  </AccordionItem>
+
+  <AccordionItem title="Community & Content">
+
+### ungatekeepPosts
+
+Broadcast posts for community updates.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `uuid` | Primary key |
+| `title` | `text` | Post title (required) |
+| `content` | `text` | Post content (required) |
+| `images` | `text[]` | Appwrite file IDs |
+| `linkUrl` | `text` | External link URL |
+| `linkTitle` | `text` | Link preview title |
+| `linkImage` | `text` | Link preview image |
+| `tag` | `ungatekeepTagEnum` | Post category tag |
+| `isPinned` | `boolean` | Pinned status (default: false) |
+| `isPublished` | `boolean` | Published status (default: false) |
+| `publishedAt` | `timestamp` | Publish timestamp |
+| `userId` | `text` | Foreign key to author (required) |
+| `createdAt` | `timestamp` | Creation timestamp |
+| `updatedAt` | `timestamp` | Last update timestamp |
+
+**Relationships:**
+- Many-to-one with `user` (cascade delete)
+
+---
+
+### tasks
+
+User's personal task list.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `uuid` | Primary key |
+| `title` | `text` | Task title (required) |
+| `description` | `text` | Task description |
+| `opportunityLink` | `text` | Related opportunity link |
+| `completed` | `boolean` | Completion status (default: false) |
+| `userId` | `text` | Foreign key to user (required) |
+| `createdAt` | `timestamp` | Creation timestamp |
+| `updatedAt` | `timestamp` | Last update timestamp |
+
+**Relationships:**
+- Many-to-one with `user` (cascade delete)
+
+---
+
+### feedback
+
+User feedback submissions.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `uuid` | Primary key |
+| `mood` | `integer` | Mood rating 1-5 (required) |
+| `meaning` | `text` | Feedback category (required) |
+| `message` | `text` | Feedback message |
+| `path` | `text` | Page path where submitted |
+| `userAgent` | `text` | Browser user agent |
+| `userId` | `text` | Foreign key to user (optional) |
+| `createdAt` | `timestamp` | Creation timestamp |
+
+**Relationships:**
+- Many-to-one with `user` (set null on delete)
+
+---
+
+### waitlist
+
+Email waitlist for pre-launch signups.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `uuid` | Primary key |
+| `email` | `text` | Unique email address (required) |
+| `feedback` | `text` | User feedback |
+| `createdAt` | `timestamp` | Creation timestamp |
+
+---
+
+### newsletterSubscribers
+
+Newsletter subscription management.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `uuid` | Primary key |
+| `email` | `text` | Unique email address (required) |
+| `userId` | `text` | Foreign key to user (optional) |
+| `isSubscribed` | `boolean` | Subscription status (default: true) |
+| `createdAt` | `timestamp` | Creation timestamp |
+| `unsubscribedAt` | `timestamp` | Unsubscribe timestamp |
+
+**Relationships:**
+- Many-to-one with user (cascade delete)
+- Unique constraint on email
+
+---
+
+  </AccordionItem>
+
+  <AccordionItem title="Application Tracking">
+
+### trackerItems
+
+Tracks user's job/opportunity applications.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `uuid` | Primary key |
+| `userId` | `text` | Foreign key to user (required) |
+| `oppId` | `text` | Opportunity/internship ID (required) |
+| `kind` | `text` | Type: "internship" or "opportunity" |
+| `status` | `text` | Application status (required) |
+| `notes` | `text` | User notes |
+| `appliedAt` | `timestamp` | Application date |
+| `result` | `text` | Application result |
+| `isManual` | `boolean` | Manually added (default: false) |
+| `manualData` | `text` | JSON stringified manual data |
+| `addedAt` | `timestamp` | Tracker entry creation |
+| `updatedAt` | `timestamp` | Last update timestamp |
+
+**Relationships:**
+- Many-to-one with `user` (cascade delete)
+- Unique constraint on `userId` + `oppId`
+
+---
+
+### trackerEvents
+
+Calendar events for application deadlines.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `uuid` | Primary key |
+| `userId` | `text` | Foreign key to user (required) |
+| `title` | `text` | Event title (required) |
+| `date` | `timestamp` | Event date (required) |
+| `type` | `text` | Event type (required) |
+| `description` | `text` | Event description |
+| `createdAt` | `timestamp` | Creation timestamp |
+| `updatedAt` | `timestamp` | Last update timestamp |
+
+**Relationships:**
+- Many-to-one with user (cascade delete)
+- Unique constraint on userId + title + date
+
+---
+
+  </AccordionItem>
+</Accordion>
+
+## Relationships Diagram
+
+```
+user (central table)
+├── session (cascade)
+├── account (cascade)
+├── userOnboardingProfiles (cascade)
+├── mentors (cascade)
+├── opportunities (cascade)
+│   ├── comments (cascade)
+│   └── bookmarks (cascade)
+├── internships (cascade)
+├── comments (cascade)
+├── bookmarks (cascade)
+├── tasks (cascade)
+├── feedback (set null)
+├── toolkits (cascade)
+│   ├── toolkitContentItems (cascade)
+│   │   └── userToolkitProgress (cascade)
+│   ├── userToolkits (cascade)
+│   └── userToolkitProgress (cascade)
+├── userToolkits (cascade)
+│   └── coupons (set null)
+├── userToolkitProgress (cascade)
+├── ungatekeepPosts (cascade)
+├── newsletterSubscribers (cascade)
+├── trackerItems (cascade)
+└── trackerEvents (cascade)
+```
+
+## Key Features
+
+### Soft Deletes
+
+Several tables implement soft deletes using the `deletedAt` timestamp:
+
+- `user`
+- `opportunities`
+- `internships`
+
+Soft-deleted records remain in the database but should be filtered out in queries.
+
+### Cascade Deletes
+
+Most foreign key relationships use `onDelete: "cascade"` to automatically clean up related records when a parent record is deleted.
+
+### Array Fields
+
+PostgreSQL array types are used for:
+
+- Tags and interests (`text[]`)
+- Images (`text[]`)
+- Upvoter IDs (`text[]`)
+- Highlights and features (`text[]`)
+
+### Unique Constraints
+
+Several tables enforce unique constraints:
+
+- `user.email`
+- `session.token`
+- `tags.name`
+- `coupons.code`
+- `waitlist.email`
+- `newsletterSubscribers.email`
+- `bookmarks (userId + opportunityId)`
+- `userOnboardingProfiles (userId)`
+- `userToolkitProgress (userId + contentItemId)`
+- `trackerItems (userId + oppId)`
+- `trackerEvents (userId + title + date)`
+
+## Schema Location
+
+The complete schema is defined in:
+
+```
+lib/schema.ts
+```
+
+Migrations are stored in:
+
+```
+migrations/
+```
+
+For information on managing migrations, see the [Migration Management](/database/migrations) guide.

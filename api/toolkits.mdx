@@ -1,0 +1,511 @@
+---
+title: "Toolkits API"
+description: "API endpoints for managing educational toolkits, content, and purchases"
+---
+
+The Toolkits API allows you to manage educational content, create toolkits, and handle purchases with Razorpay integration.
+
+## Authentication
+
+- **GET /api/toolkits**: Public endpoint
+- **GET /api/toolkits/{id}**: Public endpoint (shows additional info for authenticated users)
+- **POST /api/toolkits**: Admin only
+- **POST /api/toolkits/{id}**: Requires authentication (for purchases)
+
+## List Toolkits
+
+<CodeGroup>
+```bash GET /api/toolkits
+curl -X GET "https://ftbhustle.com/api/toolkits"
+```
+</CodeGroup>
+
+Retrieve all active toolkits.
+
+### Response
+
+<ResponseField name="array" type="array">
+  Array of toolkit objects
+  
+  <Expandable title="Toolkit Object">
+    <ResponseField name="id" type="string">
+      Unique identifier for the toolkit
+    </ResponseField>
+    
+    <ResponseField name="title" type="string">
+      Toolkit title
+    </ResponseField>
+    
+    <ResponseField name="description" type="string">
+      Detailed description of the toolkit
+    </ResponseField>
+    
+    <ResponseField name="price" type="number">
+      Price in rupees
+    </ResponseField>
+    
+    <ResponseField name="originalPrice" type="number">
+      Original price (for displaying discounts)
+    </ResponseField>
+    
+    <ResponseField name="coverImageUrl" type="string">
+      URL of the cover image
+    </ResponseField>
+    
+    <ResponseField name="videoUrl" type="string">
+      YouTube promo video URL
+    </ResponseField>
+    
+    <ResponseField name="contentUrl" type="string">
+      URL to toolkit content page (legacy)
+    </ResponseField>
+    
+    <ResponseField name="category" type="string">
+      Category for filtering (e.g., "Career", "Skills")
+    </ResponseField>
+    
+    <ResponseField name="highlights" type="array">
+      Array of feature highlights (e.g., ["10 lessons", "Lifetime access"])
+    </ResponseField>
+    
+    <ResponseField name="totalDuration" type="string">
+      Total duration (e.g., "2h 30m")
+    </ResponseField>
+    
+    <ResponseField name="lessonCount" type="number">
+      Number of lessons
+    </ResponseField>
+    
+    <ResponseField name="isActive" type="boolean">
+      Whether the toolkit is active
+    </ResponseField>
+    
+    <ResponseField name="showSaleBadge" type="boolean">
+      Whether to show a sale badge
+    </ResponseField>
+    
+    <ResponseField name="userId" type="string">
+      ID of the creator
+    </ResponseField>
+    
+    <ResponseField name="creatorName" type="string">
+      Name of the creator
+    </ResponseField>
+    
+    <ResponseField name="createdAt" type="string">
+      Creation timestamp (ISO 8601 format)
+    </ResponseField>
+    
+    <ResponseField name="updatedAt" type="string">
+      Last update timestamp (ISO 8601 format)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json Response
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "title": "Complete Web Development Course",
+    "description": "Master web development from scratch",
+    "price": 1999,
+    "originalPrice": 2999,
+    "coverImageUrl": "https://example.com/cover.jpg",
+    "videoUrl": "https://youtube.com/watch?v=xyz",
+    "contentUrl": null,
+    "category": "Skills",
+    "highlights": [
+      "15 video lessons",
+      "Lifetime access",
+      "Certificate of completion"
+    ],
+    "totalDuration": "5h 30m",
+    "lessonCount": 15,
+    "isActive": true,
+    "showSaleBadge": true,
+    "userId": "creator123",
+    "creatorName": "John Doe",
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-03-01T14:30:00Z"
+  }
+]
+```
+</ResponseExample>
+
+## Get Single Toolkit
+
+<CodeGroup>
+```bash GET /api/toolkits/{id}
+curl -X GET "https://ftbhustle.com/api/toolkits/550e8400-e29b-41d4-a716-446655440000" \
+  -H "Cookie: session=YOUR_SESSION_TOKEN"
+```
+</CodeGroup>
+
+Retrieve detailed information about a specific toolkit, including content items and purchase status.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the toolkit
+</ParamField>
+
+### Response
+
+<ResponseField name="toolkit" type="object">
+  The toolkit object with all details
+</ResponseField>
+
+<ResponseField name="contentItems" type="array">
+  Array of content items in the toolkit
+  
+  <Expandable title="Content Item Object">
+    <ResponseField name="id" type="string">
+      Unique identifier for the content item
+    </ResponseField>
+    
+    <ResponseField name="toolkitId" type="string">
+      ID of the parent toolkit
+    </ResponseField>
+    
+    <ResponseField name="title" type="string">
+      Content item title
+    </ResponseField>
+    
+    <ResponseField name="type" type="string">
+      Type: `article` or `video`
+    </ResponseField>
+    
+    <ResponseField name="content" type="string">
+      HTML content (for articles)
+    </ResponseField>
+    
+    <ResponseField name="bunnyVideoUrl" type="string">
+      Bunny CDN video URL (for videos)
+    </ResponseField>
+    
+    <ResponseField name="orderIndex" type="number">
+      Display order
+    </ResponseField>
+    
+    <ResponseField name="createdAt" type="string">
+      Creation timestamp
+    </ResponseField>
+    
+    <ResponseField name="updatedAt" type="string">
+      Last update timestamp
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="hasPurchased" type="boolean">
+  Whether the current user has purchased this toolkit
+</ResponseField>
+
+<ResponseField name="completedItemIds" type="array">
+  Array of content item IDs the user has completed
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "toolkit": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "title": "Complete Web Development Course",
+    "description": "Master web development from scratch",
+    "price": 1999,
+    "originalPrice": 2999,
+    "coverImageUrl": "https://example.com/cover.jpg",
+    "videoUrl": "https://youtube.com/watch?v=xyz",
+    "contentUrl": null,
+    "category": "Skills",
+    "highlights": ["15 video lessons", "Lifetime access"],
+    "totalDuration": "5h 30m",
+    "lessonCount": 15,
+    "isActive": true,
+    "userId": "creator123",
+    "creatorName": "John Doe",
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-03-01T14:30:00Z"
+  },
+  "contentItems": [
+    {
+      "id": "item-1",
+      "toolkitId": "550e8400-e29b-41d4-a716-446655440000",
+      "title": "Introduction to HTML",
+      "type": "video",
+      "content": null,
+      "bunnyVideoUrl": "https://cdn.bunny.net/video123",
+      "orderIndex": 0,
+      "createdAt": "2024-01-15T10:00:00Z",
+      "updatedAt": "2024-01-15T10:00:00Z"
+    }
+  ],
+  "hasPurchased": true,
+  "completedItemIds": ["item-1"]
+}
+```
+</ResponseExample>
+
+## Create Toolkit
+
+<CodeGroup>
+```bash POST /api/toolkits
+curl -X POST "https://ftbhustle.com/api/toolkits" \
+  -H "Cookie: session=YOUR_SESSION_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "New Course",
+    "description": "Learn something new",
+    "price": 999,
+    "originalPrice": 1499,
+    "category": "Skills",
+    "lessonCount": 10,
+    "totalDuration": "3h 00m"
+  }'
+```
+</CodeGroup>
+
+Create a new toolkit. Admin only.
+
+### Request Body
+
+<ParamField body="title" type="string" required>
+  Toolkit title
+</ParamField>
+
+<ParamField body="description" type="string" required>
+  Detailed description
+</ParamField>
+
+<ParamField body="price" type="number" required>
+  Price in rupees
+</ParamField>
+
+<ParamField body="originalPrice" type="number">
+  Original price (for discounts)
+</ParamField>
+
+<ParamField body="coverImageUrl" type="string">
+  Cover image URL
+</ParamField>
+
+<ParamField body="videoUrl" type="string">
+  YouTube promo video URL
+</ParamField>
+
+<ParamField body="contentUrl" type="string">
+  Content page URL (legacy)
+</ParamField>
+
+<ParamField body="category" type="string">
+  Category name
+</ParamField>
+
+<ParamField body="highlights" type="array">
+  Array of feature highlights
+</ParamField>
+
+<ParamField body="totalDuration" type="string">
+  Total duration
+</ParamField>
+
+<ParamField body="lessonCount" type="number">
+  Number of lessons
+</ParamField>
+
+<ParamField body="showSaleBadge" type="boolean">
+  Show sale badge
+</ParamField>
+
+### Response
+
+<ResponseField name="object" type="object">
+  The created toolkit object
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "id": "550e8400-e29b-41d4-a716-446655440001",
+  "title": "New Course",
+  "description": "Learn something new",
+  "price": 999,
+  "originalPrice": 1499,
+  "coverImageUrl": null,
+  "videoUrl": null,
+  "contentUrl": null,
+  "category": "Skills",
+  "highlights": null,
+  "totalDuration": "3h 00m",
+  "lessonCount": 10,
+  "isActive": false,
+  "showSaleBadge": null,
+  "userId": "admin123",
+  "createdAt": "2024-03-15T14:30:00Z",
+  "updatedAt": "2024-03-15T14:30:00Z"
+}
+```
+</ResponseExample>
+
+## Purchase Toolkit
+
+<CodeGroup>
+```bash POST /api/toolkits/{id}
+curl -X POST "https://ftbhustle.com/api/toolkits/550e8400-e29b-41d4-a716-446655440000" \
+  -H "Cookie: session=YOUR_SESSION_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "couponCode": "SAVE100"
+  }'
+```
+</CodeGroup>
+
+Initiate a toolkit purchase with optional coupon code. Returns Razorpay order details for payment.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the toolkit to purchase
+</ParamField>
+
+### Request Body
+
+<ParamField body="couponCode" type="string">
+  Optional coupon code for discount
+</ParamField>
+
+### Response
+
+<ResponseField name="success" type="boolean">
+  Indicates if the purchase initiation was successful
+</ResponseField>
+
+<ResponseField name="free" type="boolean">
+  Whether the purchase is free (fully covered by coupon)
+</ResponseField>
+
+<ResponseField name="order" type="object">
+  Razorpay order details (not present if free=true)
+  
+  <Expandable title="Order Object">
+    <ResponseField name="id" type="string">
+      Razorpay order ID
+    </ResponseField>
+    
+    <ResponseField name="amount" type="number">
+      Amount in paisa
+    </ResponseField>
+    
+    <ResponseField name="currency" type="string">
+      Currency code (INR)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="key" type="string">
+  Razorpay key ID for frontend integration
+</ResponseField>
+
+<ResponseField name="purchase" type="object">
+  Purchase record details
+</ResponseField>
+
+<ResponseField name="toolkit" type="object">
+  The toolkit being purchased
+</ResponseField>
+
+<ResponseField name="discountAmount" type="number">
+  Discount applied in rupees
+</ResponseField>
+
+<ResponseField name="finalPrice" type="number">
+  Final price after discount in rupees
+</ResponseField>
+
+<ResponseExample>
+```json Paid Purchase Response
+{
+  "success": true,
+  "free": false,
+  "order": {
+    "id": "order_ABC123XYZ",
+    "amount": 189900,
+    "currency": "INR"
+  },
+  "key": "rzp_live_XXXXXXXXXX",
+  "purchase": {
+    "id": "purchase-id-123",
+    "userId": "user123",
+    "toolkitId": "550e8400-e29b-41d4-a716-446655440000",
+    "razorpayOrderId": "order_ABC123XYZ",
+    "paymentStatus": "pending",
+    "amountPaid": 189900,
+    "couponId": "coupon-id-456",
+    "createdAt": "2024-03-15T14:30:00Z"
+  },
+  "toolkit": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "title": "Complete Web Development Course",
+    "price": 1999
+  },
+  "discountAmount": 100,
+  "finalPrice": 1899
+}
+```
+
+```json Free Purchase Response
+{
+  "success": true,
+  "free": true,
+  "purchase": {
+    "id": "purchase-id-123",
+    "userId": "user123",
+    "toolkitId": "550e8400-e29b-41d4-a716-446655440000",
+    "razorpayOrderId": null,
+    "paymentStatus": "completed",
+    "amountPaid": 0,
+    "couponId": "coupon-id-456",
+    "createdAt": "2024-03-15T14:30:00Z"
+  },
+  "toolkit": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "title": "Complete Web Development Course",
+    "price": 1999
+  },
+  "discountAmount": 1999,
+  "finalPrice": 0
+}
+```
+</ResponseExample>
+
+### Coupon Validation Errors
+
+<ResponseField name="error" type="string">
+  Error message for coupon issues
+</ResponseField>
+
+Possible coupon error responses (400 Bad Request):
+
+- `Invalid coupon code`: Coupon does not exist
+- `Coupon is not active`: Coupon has been deactivated
+- `Coupon has expired`: Coupon expiration date has passed
+- `You have already used this coupon`: User has reached per-user limit
+- `Coupon usage limit reached`: Total usage limit reached
+- `Toolkit already purchased`: User already owns this toolkit
+
+## Error Responses
+
+All API endpoints return appropriate HTTP status codes:
+
+- **401 Unauthorized**: User is not authenticated (where required)
+- **403 Forbidden**: User doesn't have admin privileges
+- **404 Not Found**: Toolkit not found
+- **400 Bad Request**: Validation error or coupon issue
+- **500 Internal Server Error**: Server error
+
+```json Error Response Example
+{
+  "error": "Failed to fetch toolkit"
+}
+```

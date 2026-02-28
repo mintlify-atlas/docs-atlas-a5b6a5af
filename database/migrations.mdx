@@ -1,0 +1,418 @@
+---
+title: Migration Management
+description: Guide to generating, applying, and managing database migrations with Drizzle Kit
+---
+
+# Migration Management
+
+FTB Hustle uses [Drizzle Kit](https://orm.drizzle.team/kit-docs/overview) for database schema migrations. Drizzle Kit provides a type-safe way to manage database schema changes and keeps your database in sync with your TypeScript schema definitions.
+
+## Overview
+
+The migration workflow involves:
+
+1. Modifying the schema in `lib/schema.ts`
+2. Generating migration files from schema changes
+3. Applying migrations to the database
+4. Version controlling migration files
+
+## Configuration
+
+The Drizzle configuration is defined in `drizzle.config.ts`:
+
+```typescript
+import { defineConfig } from "drizzle-kit";
+import { loadEnvConfig } from "@next/env";
+
+// Load Next.js environment variables
+const projectDir = process.cwd();
+loadEnvConfig(projectDir);
+
+export default defineConfig({
+  schema: "./lib/schema.ts",
+  out: "./migrations",
+  dialect: "postgresql",
+  dbCredentials: {
+    url: process.env.DATABASE_URL!,
+  },
+});
+```
+
+### Configuration Options
+
+- `schema`: Path to your schema file(s)
+- `out`: Directory where migration files are generated
+- `dialect`: Database type (PostgreSQL)
+- `dbCredentials.url`: Database connection string from environment variables
+
+## Available Commands
+
+The following npm scripts are available for migration management:
+
+### Generate Migrations
+
+```bash
+npm run dz:generate
+```
+
+Generates new migration files based on schema changes:
+
+- Compares your current schema (`lib/schema.ts`) with the existing migrations
+- Creates SQL migration files in the `migrations/` directory
+- Names migrations automatically (e.g., `0001_blue_shooting_star.sql`)
+
+**When to use:**
+- After adding new tables or columns
+- After modifying existing table structures
+- After adding/removing indexes or constraints
+
+<Note>
+  Always review generated migration files before applying them to ensure they match your intended changes.
+</Note>
+
+### Push Schema Changes
+
+```bash
+npm run dz:push
+```
+
+Directly pushes schema changes to the database without generating migration files:
+
+- Useful for rapid development and prototyping
+- Applies changes directly from `lib/schema.ts`
+- Does not create migration files
+
+<Warning>
+  Use `dz:push` only in development. For production, always use `dz:generate` to create migration files that can be version controlled and reviewed.
+</Warning>
+
+**When to use:**
+- Local development and experimentation
+- Quick schema iterations
+- Non-production environments
+
+### Pull Schema from Database
+
+```bash
+npm run dz:pull
+```
+
+Introspects the database and generates TypeScript schema code:
+
+- Connects to your database
+- Reads the existing schema structure
+- Generates Drizzle schema definitions
+
+**When to use:**
+- When working with an existing database
+- To sync schema definitions with database state
+- After manual database changes (not recommended)
+
+## Migration Workflow
+
+### Development Workflow
+
+1. **Modify Schema**
+
+   Edit `lib/schema.ts` to add/modify tables:
+
+   ```typescript
+   export const newTable = pgTable("new_table", {
+     id: uuid("id").primaryKey().defaultRandom(),
+     name: text("name").notNull(),
+     createdAt: timestamp("created_at").defaultNow(),
+   });
+   ```
+
+2. **Generate Migration**
+
+   ```bash
+   npm run dz:generate
+   ```
+
+   This creates a new migration file like `migrations/0035_new_table.sql`:
+
+   ```sql
+   CREATE TABLE "new_table" (
+     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+     "name" text NOT NULL,
+     "created_at" timestamp DEFAULT now()
+   );
+   ```
+
+3. **Review Migration**
+
+   Check the generated SQL to ensure it matches your intentions.
+
+4. **Apply Migration**
+
+   For development, you can use:
+
+   ```bash
+   npm run dz:push
+   ```
+
+   Or apply the migration through your deployment pipeline.
+
+5. **Commit Changes**
+
+   ```bash
+   git add lib/schema.ts migrations/
+   git commit -m "feat: add new_table for feature X"
+   ```
+
+### Production Workflow
+
+1. **Test Locally**
+
+   Always test migrations on a local or staging database first.
+
+2. **Review Migration Files**
+
+   Ensure migrations are safe and won't cause data loss:
+   - Check for potentially destructive operations
+   - Verify foreign key constraints
+   - Test rollback procedures if needed
+
+3. **Backup Database**
+
+   Before applying migrations to production, create a database backup.
+
+4. **Apply Migrations**
+
+   Run migrations through your deployment pipeline or CI/CD process.
+
+5. **Verify**
+
+   Check that the database structure matches expectations and the application works correctly.
+
+## Migration Files
+
+Migration files are stored in the `migrations/` directory:
+
+```
+migrations/
+├── 0000_blue_shooting_star.sql
+├── 0001_huge_marten_broadcloak.sql
+├── 0002_short_veda.sql
+├── ...
+└── meta/
+    ├── _journal.json
+    └── 0000_snapshot.json
+```
+
+### File Structure
+
+- **SQL files**: Contain the actual migration SQL statements
+- **meta/ directory**: Contains metadata about migrations
+- **_journal.json**: Tracks migration history
+- **Snapshot files**: Store schema snapshots for comparison
+
+### Migration Naming
+
+Drizzle Kit automatically names migrations using a pattern:
+
+```
+<sequence_number>_<random_name>.sql
+```
+
+Example: `0034_brave_squadron_sinister.sql`
+
+- Sequence number ensures ordered execution
+- Random name provides uniqueness and readability
+
+## Common Operations
+
+### Adding a New Table
+
+1. Define the table in `lib/schema.ts`:
+
+   ```typescript
+   export const myTable = pgTable("my_table", {
+     id: uuid("id").primaryKey().defaultRandom(),
+     name: text("name").notNull(),
+   });
+   ```
+
+2. Generate migration:
+
+   ```bash
+   npm run dz:generate
+   ```
+
+### Adding a Column
+
+1. Add the column to the table definition:
+
+   ```typescript
+   export const user = pgTable("user", {
+     // ... existing columns
+     newField: text("new_field"),
+   });
+   ```
+
+2. Generate migration:
+
+   ```bash
+   npm run dz:generate
+   ```
+
+### Renaming a Column
+
+Drizzle may interpret column renames as drop + add operations. For safe renames:
+
+1. Generate the migration:
+
+   ```bash
+   npm run dz:generate
+   ```
+
+2. Manually edit the migration file to use `ALTER TABLE ... RENAME COLUMN`:
+
+   ```sql
+   ALTER TABLE "user" RENAME COLUMN "old_name" TO "new_name";
+   ```
+
+### Adding an Enum
+
+1. Define the enum in `lib/schema.ts`:
+
+   ```typescript
+   export const myEnum = pgEnum("my_enum", ["value1", "value2"]);
+   ```
+
+2. Use it in a table:
+
+   ```typescript
+   export const myTable = pgTable("my_table", {
+     status: myEnum("status").notNull(),
+   });
+   ```
+
+3. Generate migration:
+
+   ```bash
+   npm run dz:generate
+   ```
+
+### Adding a Foreign Key
+
+1. Add the reference in the schema:
+
+   ```typescript
+   export const posts = pgTable("posts", {
+     id: uuid("id").primaryKey().defaultRandom(),
+     userId: text("user_id")
+       .notNull()
+       .references(() => user.id, { onDelete: "cascade" }),
+   });
+   ```
+
+2. Generate migration:
+
+   ```bash
+   npm run dz:generate
+   ```
+
+### Adding an Index
+
+1. Add the index in the table definition:
+
+   ```typescript
+   export const posts = pgTable(
+     "posts",
+     {
+       id: uuid("id").primaryKey().defaultRandom(),
+       userId: text("user_id").notNull(),
+     },
+     (table) => [
+       index("posts_user_id_idx").on(table.userId),
+     ]
+   );
+   ```
+
+2. Generate migration:
+
+   ```bash
+   npm run dz:generate
+   ```
+
+## Best Practices
+
+### Do's
+
+- **Version control migrations**: Always commit migration files to Git
+- **Review generated SQL**: Check migrations before applying them
+- **Test locally first**: Test migrations on development databases
+- **Use meaningful schema changes**: Make atomic, logical changes
+- **Backup production data**: Always backup before production migrations
+- **Use transactions**: Most Drizzle migrations run in transactions automatically
+
+### Don'ts
+
+- **Don't modify existing migrations**: Once applied, don't change migration files
+- **Don't delete migrations**: Keep migration history intact
+- **Don't skip migrations**: Apply migrations in sequence
+- **Don't use `dz:push` in production**: Always use generated migrations
+- **Don't make breaking changes without planning**: Plan data migrations for breaking schema changes
+
+## Troubleshooting
+
+### Migration Generation Fails
+
+**Problem**: `npm run dz:generate` doesn't detect changes
+
+**Solution**:
+- Ensure schema changes are saved in `lib/schema.ts`
+- Check for TypeScript errors in the schema file
+- Verify Drizzle Kit is properly installed
+
+### Connection Errors
+
+**Problem**: "Cannot connect to database"
+
+**Solution**:
+- Check `DATABASE_URL` in `.env.local`
+- Verify database is running
+- Ensure network connectivity to database
+
+### Type Errors
+
+**Problem**: TypeScript errors after schema changes
+
+**Solution**:
+- Ensure schema types are properly exported
+- Restart TypeScript server
+- Check for circular dependencies
+
+### Migration Conflicts
+
+**Problem**: Multiple developers create migrations simultaneously
+
+**Solution**:
+- Communicate schema changes with team
+- Merge migration files carefully
+- Regenerate migrations if needed after merge
+
+## Environment Variables
+
+Required environment variables for migrations:
+
+```bash
+# .env.local
+DATABASE_URL=postgresql://user:password@host:port/database
+```
+
+For production:
+
+```bash
+# .env.production
+DATABASE_URL=postgresql://user:password@prod-host:port/database
+```
+
+## Related Resources
+
+- [Database Schema](/database/schema) - Complete schema reference
+- [Drizzle ORM Documentation](https://orm.drizzle.team) - Official Drizzle docs
+- [Drizzle Kit Documentation](https://orm.drizzle.team/kit-docs/overview) - Drizzle Kit guide
+- [PostgreSQL Documentation](https://www.postgresql.org/docs/) - PostgreSQL reference

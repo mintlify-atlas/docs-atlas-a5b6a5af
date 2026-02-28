@@ -1,0 +1,476 @@
+---
+title: Profile Setup & Management
+description: Complete your FTB Hustle profile to personalize your experience and unlock all platform features
+---
+
+Your FTB Hustle profile is your identity on the platform. A complete profile helps you get personalized recommendations, connect with others, and make the most of the platform's features.
+
+## Why Complete Your Profile?
+
+A well-maintained profile:
+
+- **Personalizes recommendations** - Get opportunities matching your interests
+- **Builds credibility** - Verified profiles inspire trust
+- **Enables connections** - Other users can learn about your background
+- **Tracks completeness** - Visual progress bar shows profile completion
+- **Enhances experience** - Full access to all platform features
+
+<Note>
+  Profile completion is tracked as a percentage (0-100%) based on filled fields. Aim for 100% to maximize platform benefits.
+</Note>
+
+## Accessing Your Profile
+
+<Steps>
+  <Step title="Log in to FTB Hustle">
+    Ensure you're logged in with your registered account.
+  </Step>
+
+  <Step title="Navigate to profile">
+    Click on your avatar or name in the navigation bar, then select **"Profile"** or **"Settings"**.
+  </Step>
+
+  <Step title="View profile form">
+    The profile page displays your current information with editable fields.
+  </Step>
+</Steps>
+
+## Profile Fields
+
+Here's a comprehensive breakdown of all profile fields:
+
+### Basic Information
+
+**Email Address** (read-only)
+- Your registered email address
+- Cannot be edited directly from profile
+- Used for authentication and notifications
+- Displayed below your avatar
+
+**Full Name** (required)
+- Minimum: 1 character
+- Maximum: 80 characters
+- Displayed across the platform (posts, comments, etc.)
+- First field to complete
+
+<Tip>
+  Use your real name to build authenticity and trust within the community.
+</Tip>
+
+**Profile Picture** (optional)
+- Upload custom avatar image
+- Supported formats: JPG, PNG, GIF
+- Maximum size: Typically 5MB
+- Stored in secure cloud storage (Appwrite)
+- Displays as fallback initials if not uploaded
+
+<Steps>
+  <Step title="Upload profile picture">
+    1. Hover over the avatar circle
+    2. Click the overlay that appears
+    3. Select an image from your device
+    4. Image uploads automatically
+    5. Preview appears immediately
+  </Step>
+</Steps>
+
+### Personal Details
+
+**Date of Birth** (optional)
+- Select from calendar picker
+- Cannot select future dates
+- Format: YYYY-MM-DD
+- Helps with age-appropriate opportunity recommendations
+
+**Contact Number** (optional)
+- Must be exactly 10 digits
+- Indian mobile number format
+- Numeric only (no spaces or special characters)
+- Kept confidential, used only for service quality
+
+**College/Institute** (optional)
+- Maximum: 80 characters
+- Alphanumeric with basic punctuation allowed
+- Special characters: spaces, periods, commas, ampersands, parentheses, hyphens
+- Cannot be only numbers
+- Examples: "IIT Delhi", "MIT College of Engineering"
+
+### Professional Information
+
+**Current Role** (required)
+- Select from predefined options or specify custom
+- Options typically include:
+  - Student
+  - Working Professional
+  - Entrepreneur
+  - Freelancer
+  - Job Seeker
+  - Other (with custom text field)
+
+**If "Other" selected:**
+- Custom role text field appears
+- Required when "Other" is selected
+- Allows you to specify your unique role
+
+<Note>
+  Your current role helps tailor opportunity recommendations to your career stage and goals.
+</Note>
+
+### Interests & Preferences
+
+**Field Interests** (required)
+- Select at least 1 interest
+- Multiple selections allowed
+- Common options:
+  - Technology
+  - Design
+  - Business
+  - Marketing
+  - Science
+  - Arts
+  - Engineering
+  - Other (with custom specification)
+
+**If "Other" selected:**
+- Custom field interest text field appears
+- Required when "Other" is selected
+- Specify your unique interest area
+
+**Opportunity Interests** (required)
+- Select at least 1 interest
+- Multiple selections allowed
+- Options:
+  - Hackathons
+  - Grants
+  - Competitions
+  - Ideathons
+  - Internships
+  - Workshops
+  - Other (with custom specification)
+
+**If "Other" selected:**
+- Custom opportunity interest text field appears
+- Required when "Other" is selected
+- Specify your unique opportunity preferences
+
+<Tip>
+  Select all interests that genuinely appeal to you. This ensures you receive diverse, relevant opportunity recommendations.
+</Tip>
+
+## Editing Your Profile
+
+<Steps>
+  <Step title="Navigate to profile page">
+    Access your profile settings from the main navigation.
+  </Step>
+
+  <Step title="Modify fields">
+    Update any editable field:
+    - Click into text fields and type
+    - Use dropdowns for selections
+    - Click calendar for date selection
+    - Upload images via the avatar overlay
+
+    The form is always in edit mode for convenience.
+  </Step>
+
+  <Step title="Review changes">
+    Verify all information is correct and properly formatted.
+
+    The **Save** button is only enabled when you've made changes.
+  </Step>
+
+  <Step title="Save profile">
+    Click the **"Save"** button to submit changes.
+
+    The system will:
+    1. Validate all fields
+    2. Upload new profile picture (if changed)
+    3. Update database records
+    4. Show success confirmation
+    5. Update profile completion percentage
+  </Step>
+</Steps>
+
+### Validation Rules
+
+| Field | Validation |
+|-------|------------|
+| Name | Required, 1-80 characters |
+| Field Interests | Required, at least 1 selection |
+| Field Interest (Other) | Required if "Other" selected |
+| Opportunity Interests | Required, at least 1 selection |
+| Opportunity Interest (Other) | Required if "Other" selected |
+| Date of Birth | Optional, must be past date |
+| College/Institute | Optional, max 80 chars, no special chars, not only numbers |
+| Contact Number | Optional, exactly 10 digits |
+| Current Role | Required, select from list or specify |
+| Current Role (Other) | Required if "Other" selected |
+| Profile Picture | Optional, valid image format |
+
+## Profile Completion Tracking
+
+Your profile completion percentage is calculated based on 8 criteria:
+
+1. ✅ **Name filled** - Has valid name (1+ character)
+2. ✅ **Field interests selected** - At least 1 field interest
+3. ✅ **Opportunity interests selected** - At least 1 opportunity interest
+4. ✅ **Date of birth provided** - Valid date selected
+5. ✅ **College/institute specified** - Valid institution name
+6. ✅ **Contact number added** - Exactly 10 digits
+7. ✅ **Current role selected** - Valid role specified
+8. ✅ **Profile picture uploaded** - Custom avatar image
+
+**Calculation:** (Completed criteria / 8) × 100 = Completion %
+
+Example:
+- 4 out of 8 criteria met = 50% complete
+- 8 out of 8 criteria met = 100% complete
+
+<Info>
+  The profile completion percentage is displayed as a progress bar, helping you visualize what's missing and motivating you to complete your profile.
+</Info>
+
+## User Onboarding Profiles
+
+For new users, FTB Hustle includes an enhanced onboarding flow capturing additional preferences:
+
+### Onboarding Data
+
+During onboarding, you may provide:
+
+**Persona Type**
+- Student
+- Society/Organization
+
+**Location Information**
+- Location type (City, State, Country, Remote)
+- Location value (specific place)
+
+**Education Details**
+- Education level (High School, Undergraduate, Graduate, PhD)
+- Field of study
+- Custom field if "Other"
+
+**Preferences**
+- Opportunity interests (array)
+- Domain preferences (array)
+- Challenges/struggles (array)
+
+### Onboarding Schema
+```sql
+userOnboardingProfiles {
+  id: uuid (primary key)
+  userId: text (unique, references user)
+  persona: 'student' | 'society'
+  locationType: text
+  locationValue: text
+  educationLevel: text
+  fieldOfStudy: text
+  fieldOther: text
+  opportunityInterests: text[]
+  domainPreferences: text[]
+  struggles: text[]
+  createdAt: timestamp
+  updatedAt: timestamp
+}
+```
+
+<Note>
+  Onboarding data is separate from your main profile but complements it by providing deeper insights for personalization.
+</Note>
+
+## Privacy & Data Usage
+
+### What's Visible
+
+**Public Information:**
+- Profile picture
+- Name
+- Current role (if you choose to display)
+- Posts and comments you create
+- Upvotes and interactions (may be visible)
+
+**Private Information:**
+- Email address (only you and admins)
+- Contact number (confidential)
+- Date of birth (confidential)
+- College/institute (confidential)
+- Specific interests (used for recommendations only)
+
+### Data Usage
+
+<Info>
+  All profile details are confidential and utilized solely for enhancing service quality and personalizing your experience.
+</Info>
+
+- **Recommendations** - Interests determine which opportunities appear
+- **Analytics** - Aggregate, anonymized data improves platform
+- **Communications** - Email for important updates only
+- **No sharing** - Personal data never sold or shared with third parties
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Complete All Fields" icon="clipboard-check">
+    Aim for 100% profile completion. Every field helps personalize your experience and builds your presence on the platform.
+  </Card>
+
+  <Card title="Use Professional Photo" icon="camera">
+    Upload a clear, professional-looking profile picture. It increases trust and recognition in the community.
+  </Card>
+
+  <Card title="Keep Information Current" icon="arrows-rotate">
+    Update your role, interests, and details as your career and goals evolve.
+  </Card>
+
+  <Card title="Be Honest" icon="handshake">
+    Provide accurate information. This ensures you receive relevant opportunities and builds authentic connections.
+  </Card>
+
+  <Card title="Protect Privacy" icon="shield">
+    Only share information you're comfortable with. Remember what's marked as confidential.
+  </Card>
+
+  <Card title="Review Regularly" icon="calendar">
+    Periodically review your profile (quarterly) to ensure all information remains accurate and up-to-date.
+  </Card>
+</CardGroup>
+
+## User Roles
+
+FTB Hustle has three user roles with different permissions:
+
+### User (Default)
+- Can browse all opportunities
+- Can bookmark and track opportunities
+- Can create tasks
+- Can comment and upvote
+- **Cannot post opportunities directly** (requires approval)
+- Can purchase toolkits
+
+### Member
+- All "User" permissions
+- **Can post opportunities directly** (no approval needed)
+- Can see pending opportunities
+- Enhanced visibility
+
+### Admin
+- All "Member" permissions
+- Can approve/reject opportunity submissions
+- Can see all opportunities (including scheduled)
+- Can manage users and content
+- Can create and manage toolkits
+- Can view analytics and reports
+
+<Note>
+  Your role is displayed in your profile. Contact FTB Hustle support if you believe you should have member or admin access.
+</Note>
+
+## Advanced Features
+
+### Avatar Upload Process
+
+Understanding how profile pictures work:
+
+1. **Select Image** - Choose from device
+2. **Local Preview** - Image previews immediately using blob URL
+3. **Upload on Save** - Image uploads to Appwrite when you save profile
+4. **Progress Tracking** - Upload progress shown as percentage
+5. **URL Generation** - Appwrite returns public URL
+6. **Database Update** - URL saved to user record
+7. **Display** - Image loads from Appwrite CDN
+
+**Error Handling:**
+- Upload failures show toast notification
+- Original avatar retained on failure
+- Retry by saving again
+
+### Form State Management
+
+The profile form uses React Hook Form with Zod validation:
+
+```typescript
+const formSchema = z.object({
+  name: z.string().min(1).max(80),
+  fieldInterests: z.array(z.string()).min(1),
+  opportunityInterests: z.array(z.string()).min(1),
+  dateOfBirth: z.string().optional(),
+  collegeInstitute: z.string().max(80).optional(),
+  contactNumber: z.string().regex(/^\d{10}$/).optional(),
+  currentRole: z.string().min(1),
+  // ... plus conditional validations for "Other" fields
+})
+```
+
+**State Features:**
+- Real-time validation on blur
+- Change tracking (Save button only enabled on changes)
+- Error messages below each field
+- Form reset after successful save
+
+## Troubleshooting
+
+**Profile picture won't upload**
+- Check file size (under 5MB recommended)
+- Verify file format (JPG, PNG, GIF)
+- Ensure stable internet connection
+- Try a different browser
+- Clear browser cache
+
+**Save button is disabled**
+- No changes have been made to the form
+- Make at least one modification to enable
+- Check for validation errors (red text)
+
+**Validation errors**
+- Read error message carefully
+- **Name**: Cannot be empty
+- **Contact**: Must be exactly 10 digits
+- **College**: No special characters, not only numbers
+- **Interests**: Must select at least one
+- **"Other" fields**: Required when "Other" is selected
+
+**Profile completion not updating**
+- Save the profile successfully first
+- Refresh the page
+- Ensure all required fields are filled
+- Check that optional fields contributing to percentage are completed
+
+**Changes not saving**
+- Verify internet connection
+- Check browser console for errors
+- Try logging out and back in
+- Attempt in incognito/private mode
+- Contact support if issue persists
+
+## Next Steps
+
+After completing your profile:
+
+- Browse opportunities matching your interests
+- Bookmark opportunities you want to apply for
+- Create tasks to organize your applications
+- Explore and purchase relevant toolkits
+- Engage with the community through comments
+- Share opportunities you discover
+
+<CardGroup cols={2}>
+  <Card title="Create Opportunities" icon="plus" href="/guides/creating-opportunities">
+    Share opportunities with the community
+  </Card>
+
+  <Card title="Bookmark & Track" icon="bookmark" href="/guides/bookmarking-and-tasks">
+    Organize opportunities and manage tasks
+  </Card>
+
+  <Card title="Purchase Toolkits" icon="graduation-cap" href="/guides/purchasing-toolkits">
+    Access premium learning content
+  </Card>
+</CardGroup>
+
+---
+
+<Info>
+  Need help? Contact FTB Hustle support at support@ftbhustle.com or use the feedback widget on the platform.
+</Info>

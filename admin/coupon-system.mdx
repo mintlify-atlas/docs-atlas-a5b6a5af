@@ -1,0 +1,450 @@
+---
+title: Coupon System
+description: Create and manage discount coupons for toolkit purchases
+---
+
+## Overview
+
+The Coupon System allows admins to create discount codes that users can apply during toolkit checkout. Coupons provide fixed-amount discounts in Indian Rupees (INR) and support usage limits, expiration dates, and per-user restrictions.
+
+## Accessing the Coupon Tab
+
+Navigate to the **Coupons** tab in the admin panel at `/admin?tab=coupons`.
+
+The Coupons tab displays all existing coupons with their details:
+
+<CardGroup cols={2}>
+  <Card title="Coupon Details" icon="ticket">
+    - Coupon code (e.g., SAVE100)
+    - Discount amount in INR
+    - Usage statistics
+  </Card>
+  <Card title="Controls" icon="sliders">
+    - Active/Inactive status
+    - Expiration date
+    - Usage limits (total and per user)
+  </Card>
+</CardGroup>
+
+## Creating a New Coupon
+
+<Steps>
+  <Step title="Click Create Coupon">
+    Click the **Create Coupon** button in the top right corner
+  </Step>
+  <Step title="Enter Coupon Code">
+    Input a unique code (automatically converted to uppercase)
+    Example: `SAVE100`, `LAUNCH50`, `STUDENT25`
+  </Step>
+  <Step title="Set Discount Amount">
+    Enter the discount amount in rupees (must be a positive integer)
+    Example: 100 for ₹100 off
+  </Step>
+  <Step title="Configure Usage Limits">
+    Set max total uses (leave empty for unlimited)
+    Set max uses per user (default: 1)
+  </Step>
+  <Step title="Set Expiration (Optional)">
+    Use the date-time picker to set an expiration date
+    Leave empty for no expiration
+  </Step>
+  <Step title="Set Active Status">
+    Toggle the **Active** switch to control immediate availability
+  </Step>
+  <Step title="Save Coupon">
+    Click **Create** to save the coupon
+  </Step>
+</Steps>
+
+### Coupon Code Requirements
+
+- Must be unique across all coupons
+- 1-50 characters long
+- Automatically converted to uppercase
+- Cannot contain spaces
+
+<Note>
+If you try to create a coupon with a code that already exists, you'll receive an error: "Coupon code already exists"
+</Note>
+
+## Coupon Configuration Options
+
+### Discount Amount
+
+Coupons use **fixed-amount discounts** in INR.
+
+```javascript
+// Example: ₹100 off
+{
+  "code": "SAVE100",
+  "discountAmount": 100
+}
+
+// Example: ₹250 off
+{
+  "code": "EARLYBIRD",
+  "discountAmount": 250
+}
+```
+
+<Warning>
+Discounts cannot exceed the toolkit price. If a user applies a coupon with a discount larger than the toolkit price, the checkout will fail or require validation.
+</Warning>
+
+### Max Total Uses
+
+Control how many times a coupon can be used across all users.
+
+- **Unlimited**: Leave the field empty or set to `null`
+- **Limited**: Set a positive integer (e.g., 100 for first 100 users)
+
+#### Usage Tracking
+
+The system tracks usage via the `currentUses` field:
+
+```
+Usage Display: 45 / 100  (45 uses out of 100 max)
+Usage Display: 12 / ∞   (12 uses, unlimited)
+```
+
+### Max Uses Per User
+
+Restrict how many times a single user can use the coupon.
+
+- Default: `1` (one-time use per user)
+- Can be increased for multi-purchase coupons
+
+<Note>
+Per-user limits are enforced at checkout. The system checks `user_toolkits` table to count previous uses of the coupon by the user.
+</Note>
+
+### Expiration Date
+
+Set a date and time when the coupon stops working.
+
+- **No expiration**: Leave empty for permanent coupons
+- **With expiration**: Select a date-time using the picker
+
+Expired coupons display their expiration date in the table:
+
+```
+Never             (no expiration set)
+Jan 15, 2026      (expires on January 15, 2026)
+```
+
+### Active Status
+
+Control whether the coupon can be used right now.
+
+- **Active** (green badge): Coupon can be applied at checkout
+- **Inactive** (gray badge): Coupon exists but cannot be used
+
+<Tip>
+Use the Active toggle to temporarily disable coupons without deleting them. This is useful for time-limited promotions.
+</Tip>
+
+## Editing an Existing Coupon
+
+<Steps>
+  <Step title="Click Edit Icon">
+    Click the edit (pencil) icon in the Actions column
+  </Step>
+  <Step title="Modify Fields">
+    Update any field except the coupon code (code cannot be changed after creation)
+  </Step>
+  <Step title="Save Changes">
+    Click **Update** to apply changes
+  </Step>
+</Steps>
+
+### Editable Fields
+
+- Discount amount
+- Max total uses
+- Max uses per user
+- Expiration date
+- Active status
+
+<Note>
+The coupon **code** cannot be edited after creation. To change a code, delete the old coupon and create a new one.
+</Note>
+
+## Deleting a Coupon
+
+<Warning>
+Deleting a coupon is permanent. However, previous purchases that used this coupon will still reference it in their records via the `couponId` field in the `user_toolkits` table.
+</Warning>
+
+<Steps>
+  <Step title="Click Delete Icon">
+    Click the trash icon in the Actions column
+  </Step>
+  <Step title="Confirm Deletion">
+    Confirm the deletion in the browser prompt
+  </Step>
+  <Step title="Coupon Removed">
+    The coupon is deleted and can no longer be used
+  </Step>
+</Steps>
+
+## How Users Apply Coupons
+
+During toolkit checkout:
+
+1. User enters coupon code in the checkout form
+2. System validates the coupon:
+   - Code must exist and be active
+   - Coupon must not be expired
+   - Total uses must be below `maxUses`
+   - User's individual uses must be below `maxUsesPerUser`
+3. If valid, discount is applied to the price
+4. After purchase, `currentUses` increments by 1
+5. Purchase record stores `couponId` in `user_toolkits` table
+
+### Validation Errors
+
+Users may see these errors:
+
+- "Invalid coupon code" - Code doesn't exist
+- "Coupon has expired" - Past expiration date
+- "Coupon usage limit reached" - Max total uses exceeded
+- "You've already used this coupon" - Per-user limit exceeded
+- "Coupon is not active" - Admin disabled the coupon
+
+## Coupon Analytics
+
+The Coupons table provides key metrics:
+
+### Usage Statistics
+
+View how many times each coupon has been used:
+
+```
+SAVE100    : 45 / 100 uses
+LAUNCH50   : 230 / ∞ uses
+STUDENT25  : 12 / 50 uses
+```
+
+### Per-User Limit Tracking
+
+The `maxUsesPerUser` column shows the restriction:
+
+```
+SAVE100    : 1  (one-time use)
+BULK20     : 5  (can use up to 5 times)
+```
+
+### Status Badges
+
+- **Green (Active)**: Coupon is currently usable
+- **Gray (Inactive)**: Coupon is disabled
+
+## Database Schema
+
+Coupons are stored in the `coupons` table:
+
+```typescript
+export const coupons = pgTable("coupons", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  code: text("code").notNull().unique(),
+  discountAmount: integer("discount_amount").notNull(),
+  maxUses: integer("max_uses"),
+  maxUsesPerUser: integer("max_uses_per_user").default(1),
+  currentUses: integer("current_uses").default(0),
+  isActive: boolean("is_active").default(true),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+```
+
+### Coupon Usage Tracking
+
+Purchases with coupons are recorded in `user_toolkits`:
+
+```typescript
+export const userToolkits = pgTable("user_toolkits", {
+  // ... other fields
+  couponId: uuid("coupon_id").references(() => coupons.id, {
+    onDelete: "set null",
+  }),
+  amountPaid: integer("amount_paid"), // Final amount after discount
+  // ...
+});
+```
+
+## API Endpoints
+
+### Get All Coupons
+
+```bash
+GET /api/admin/coupons
+
+# Response
+{
+  "coupons": [
+    {
+      "id": "uuid",
+      "code": "SAVE100",
+      "discountAmount": 100,
+      "maxUses": 100,
+      "maxUsesPerUser": 1,
+      "currentUses": 45,
+      "isActive": true,
+      "expiresAt": "2026-01-15T23:59:59Z",
+      "createdAt": "2025-01-01T00:00:00Z"
+    }
+  ]
+}
+```
+
+### Create a Coupon
+
+```bash
+POST /api/admin/coupons
+
+# Request Body
+{
+  "code": "SAVE100",
+  "discountAmount": 100,
+  "maxUses": 100,
+  "maxUsesPerUser": 1,
+  "isActive": true,
+  "expiresAt": "2026-01-15T23:59:59Z"
+}
+
+# Response
+{
+  "coupon": {
+    "id": "uuid",
+    "code": "SAVE100",
+    // ... full coupon object
+  }
+}
+```
+
+### Update a Coupon
+
+```bash
+PATCH /api/admin/coupons/[id]
+
+# Request Body (partial updates allowed)
+{
+  "discountAmount": 150,
+  "isActive": false
+}
+```
+
+### Delete a Coupon
+
+```bash
+DELETE /api/admin/coupons/[id]
+
+# Response
+{
+  "success": true,
+  "message": "Coupon deleted successfully"
+}
+```
+
+### Validate a Coupon (User-facing)
+
+```bash
+POST /api/coupons/validate
+
+# Request Body
+{
+  "code": "SAVE100",
+  "userId": "user-id",
+  "toolkitId": "toolkit-id"
+}
+
+# Response (valid)
+{
+  "valid": true,
+  "discount": 100,
+  "couponId": "uuid"
+}
+
+# Response (invalid)
+{
+  "valid": false,
+  "error": "Coupon has expired"
+}
+```
+
+## Best Practices
+
+### Naming Conventions
+
+<CardGroup cols={2}>
+  <Card title="Campaign-based" icon="bullhorn">
+    `LAUNCH50`, `BLACKFRIDAY`, `SUMMER2026`
+  </Card>
+  <Card title="Audience-based" icon="users">
+    `STUDENT25`, `FIRSTTIME`, `VIP100`
+  </Card>
+  <Card title="Value-based" icon="indian-rupee-sign">
+    `SAVE100`, `OFF200`, `DISCOUNT50`
+  </Card>
+  <Card title="Time-based" icon="clock">
+    `EARLY50`, `WEEKEND`, `FLASH100`
+  </Card>
+</CardGroup>
+
+### Usage Limit Strategies
+
+1. **Limited Launch Offer**: Set low max uses (e.g., 50) to create urgency
+2. **Unlimited Trial Period**: No max uses, but set expiration date
+3. **Per-User Loyalty**: High `maxUsesPerUser` (e.g., 5) for repeat customers
+4. **One-Time Campaign**: `maxUsesPerUser: 1` with expiration
+
+### Discount Amount Guidelines
+
+- **Small incentive**: ₹50-₹100 (5-10% off)
+- **Standard discount**: ₹100-₹250 (10-25% off)
+- **Major promotion**: ₹250-₹500 (25-50% off)
+- **Free trials**: Set discount equal to toolkit price
+
+<Warning>
+Avoid setting discounts higher than your toolkit prices, or validate at checkout to prevent negative prices.
+</Warning>
+
+## Troubleshooting
+
+### Coupon Not Working
+
+1. Check if coupon is **Active** (green badge)
+2. Verify expiration date hasn't passed
+3. Check if max uses reached (`currentUses >= maxUses`)
+4. Confirm user hasn't exceeded `maxUsesPerUser`
+
+### Duplicate Coupon Code Error
+
+Coupon codes must be unique. If you get this error:
+1. Check if a coupon with that code already exists
+2. Choose a different code
+3. Or delete the existing coupon first
+
+### Coupon Not Appearing in Checkout
+
+Coupons are entered manually by users during checkout. Ensure:
+1. Coupon is marked as **Active**
+2. Expiration date is in the future
+3. Total uses haven't been reached
+
+## Source Code Locations
+
+```bash
+# Admin coupon management
+app/admin/AdminCouponsTable.tsx
+
+# API routes
+app/api/admin/coupons/route.ts
+app/api/admin/coupons/[id]/route.ts
+
+# Coupon validation (user-facing)
+app/api/coupons/validate/route.ts
+
+# Database schema
+lib/schema.ts (coupons table)
+```

@@ -1,0 +1,213 @@
+---
+title: "Local Development Setup"
+description: "Get started with FTB Hustle development environment - installation, configuration, and running the application locally"
+---
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **Node.js**: Version 20 or higher
+- **Package Manager**: npm, yarn, pnpm, or bun
+- **PostgreSQL**: A PostgreSQL database (we recommend [Neon](https://neon.tech) for serverless PostgreSQL)
+- **Git**: For version control
+
+## Installation
+
+<Steps>
+  <Step title="Clone the repository">
+    Clone the FTB Hustle repository to your local machine:
+
+    ```bash
+    git clone <repository-url>
+    cd ftb-hustle
+    ```
+  </Step>
+
+  <Step title="Install dependencies">
+    Install the required npm packages using your preferred package manager:
+
+    <CodeGroup>
+      ```bash npm
+      npm install
+      ```
+
+      ```bash yarn
+      yarn install
+      ```
+
+      ```bash pnpm
+      pnpm install
+      ```
+
+      ```bash bun
+      bun install
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Configure environment variables">
+    Create a `.env.local` file in the root directory with the following variables:
+
+    ```bash
+    # Database
+    DATABASE_URL="postgresql://user:password@host:5432/database"
+
+    # Authentication - Better Auth
+    BETTER_AUTH_SECRET="your-secret-key-here"
+    BETTER_AUTH_URL="http://localhost:3000"
+
+    # Email - Resend
+    RESEND_API_KEY="re_xxxxxxxxxxxx"
+    EMAIL_SENDER_NAME="FTB Hustle"
+    EMAIL_SENDER_ADDRESS="noreply@yourdomain.com"
+
+    # OAuth Providers
+    GOOGLE_CLIENT_ID="your-google-client-id"
+    GOOGLE_CLIENT_SECRET="your-google-client-secret"
+    LINKEDIN_CLIENT_ID="your-linkedin-client-id"
+    LINKEDIN_CLIENT_SECRET="your-linkedin-client-secret"
+
+    # Payments - Razorpay
+    RAZORPAY_KEY_ID="rzp_test_xxxxxxxxxxxx"
+    RAZORPAY_KEY_SECRET="your-razorpay-secret"
+
+    # File Storage - Appwrite
+    NEXT_PUBLIC_APPWRITE_ENDPOINT="https://cloud.appwrite.io/v1"
+    NEXT_PUBLIC_APPWRITE_OPPORTUNITY_PROJECT_ID="your-project-id"
+    NEXT_PUBLIC_APPWRITE_OPPORTUNITIES_BUCKET_ID="your-bucket-id"
+    NEXT_PUBLIC_APPWRITE_USR_AVATAR_PROJECT_ID="your-avatar-project-id"
+
+    # Video Streaming - Bunny CDN (Optional)
+    BUNNY_STREAM_LIBRARY_ID="your-library-id"
+    BUNNY_TOKEN_SECRET="your-token-secret"
+    BUNNY_TOKEN_EXPIRY_SECONDS="3600"
+
+    # Content Management - Sanity (Optional)
+    NEXT_PUBLIC_SANITY_PROJECT_ID="your-sanity-project-id"
+    NEXT_PUBLIC_SANITY_DATASET="production"
+
+    # Performance Monitoring (Optional)
+    PERF_API_TIMING="true"
+    ```
+
+    <Note>
+      Most third-party services offer free tiers for development. Check their respective documentation for obtaining API keys.
+    </Note>
+  </Step>
+
+  <Step title="Set up the database">
+    Run Drizzle ORM migrations to set up your database schema:
+
+    <CodeGroup>
+      ```bash Generate migrations
+      npm run dz:generate
+      ```
+
+      ```bash Push to database
+      npm run dz:push
+      ```
+
+      ```bash Pull from database
+      npm run dz:pull
+      ```
+    </CodeGroup>
+
+    <Tip>
+      Use `dz:push` for quick schema changes during development. Use `dz:generate` to create migration files for production deployments.
+    </Tip>
+  </Step>
+
+  <Step title="Start the development server">
+    Launch the Next.js development server with Turbopack:
+
+    <CodeGroup>
+      ```bash npm
+      npm run dev
+      ```
+
+      ```bash yarn
+      yarn dev
+      ```
+
+      ```bash pnpm
+      pnpm dev
+      ```
+
+      ```bash bun
+      bun dev
+      ```
+    </CodeGroup>
+
+    The application will be available at [http://localhost:3000](http://localhost:3000)
+  </Step>
+</Steps>
+
+## Development Commands
+
+Here are the most commonly used npm scripts:
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server with Turbopack |
+| `npm run build` | Build for production |
+| `npm start` | Start production server |
+| `npm run lint` | Run ESLint for code quality checks |
+| `npm run test` | Run Vitest unit tests |
+| `npm run test:ui` | Run tests with Vitest UI |
+| `npm run dz:generate` | Generate Drizzle migrations |
+| `npm run dz:push` | Push schema changes to database |
+| `npm run dz:pull` | Pull schema from database |
+| `npm run clean` | Clean build artifacts and cache |
+
+## Code Formatting
+
+FTB Hustle uses Prettier for code formatting with Tailwind CSS plugin:
+
+```bash
+# Format all files
+npx prettier --write .
+
+# Check formatting
+npx prettier --check .
+```
+
+Husky is configured to run pre-commit hooks automatically.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Database connection errors">
+    - Verify your `DATABASE_URL` is correct
+    - Ensure your PostgreSQL database is running
+    - Check if your database accepts connections from your IP
+    - For Neon, verify you're using the correct connection string format
+  </Accordion>
+
+  <Accordion title="Authentication not working">
+    - Ensure `BETTER_AUTH_SECRET` is set
+    - Verify OAuth credentials (Google, LinkedIn) are correct
+    - Check if redirect URIs are properly configured in OAuth providers
+    - Confirm email service (Resend) credentials are valid
+  </Accordion>
+
+  <Accordion title="Build errors">
+    - Run `npm run clean` to clear cache
+    - Delete `node_modules` and reinstall: `rm -rf node_modules && npm install`
+    - Check for TypeScript errors: `npx tsc --noEmit`
+  </Accordion>
+
+  <Accordion title="Environment variables not loading">
+    - Ensure file is named `.env.local` (not `.env`)
+    - Restart the development server after changing environment variables
+    - Check for syntax errors in your `.env.local` file
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+Once your development environment is set up:
+
+- Review the [Architecture](/development/architecture) to understand the codebase structure
+- Explore the [Tech Stack](/development/tech-stack) to learn about key dependencies
+- Check out the [API Reference](/api/opportunities) for backend endpoints

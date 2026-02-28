@@ -1,0 +1,310 @@
+---
+title: Bookmarking & Task Management
+description: Track opportunities you're interested in and manage your application tasks efficiently with FTB Hustle's bookmarking and task management features
+---
+
+Stay organized with FTB Hustle's powerful bookmarking and task management tools. Save opportunities for later, track your applications, and never miss a deadline.
+
+## Bookmarking Opportunities
+
+Bookmarks allow you to save opportunities you're interested in for quick access later. When you bookmark an opportunity, it's automatically added to your tracker.
+
+### How to Bookmark
+
+<Steps>
+  <Step title="Find an opportunity">
+    Browse opportunities in the feed or search for specific ones.
+  </Step>
+
+  <Step title="Click the bookmark icon">
+    On any opportunity card, click the bookmark icon (🔖) in the action bar at the bottom.
+
+    - Empty bookmark: Not saved
+    - Filled yellow bookmark: Saved to your collection
+  </Step>
+
+  <Step title="Access bookmarked opportunities">
+    View all your bookmarked opportunities in:
+    - Your profile's bookmarks section
+    - The opportunity tracker dashboard
+  </Step>
+</Steps>
+
+<Note>
+  You must be logged in to bookmark opportunities. Bookmarking automatically adds the opportunity to your tracker with "Not Applied" status.
+</Note>
+
+### Bookmark Features
+
+**Automatic Tracking**
+When you bookmark an opportunity, it's added to your tracker with:
+- Opportunity title and type
+- Organization/organizer name
+- Cover image (if available)
+- Location information
+- Deadline (end date)
+- Default status: "Not Applied"
+
+**Quick Actions**
+- Click the bookmark icon again to remove the bookmark
+- Removing a bookmark doesn't remove it from your tracker (you can manage tracker items independently)
+
+<Tip>
+  Bookmark opportunities as soon as you find them interesting, even if you're not ready to apply yet. This prevents losing track of good opportunities.
+</Tip>
+
+## Task Management
+
+The task widget helps you create, organize, and complete tasks related to your opportunities and applications.
+
+### Creating Tasks
+
+<Steps>
+  <Step title="Open the task widget">
+    Navigate to your dashboard or profile where the task widget is displayed.
+  </Step>
+
+  <Step title="Click the add button">
+    Click the plus (+) icon in the task widget header.
+  </Step>
+
+  <Step title="Fill in task details">
+    In the "Create New Task" dialog:
+
+    **Title** (required)
+    - Brief description of what needs to be done
+    - Examples: "Update resume", "Prepare portfolio", "Submit application"
+
+    **Description** (optional)
+    - Additional details or notes about the task
+    - Helpful context or reminders
+  </Step>
+
+  <Step title="Create the task">
+    Click **"Create Task"** to add it to your list.
+  </Step>
+</Steps>
+
+### Managing Tasks
+
+**Mark as Complete**
+- Click the circle icon next to any task to toggle completion
+- Completed tasks show with a filled blue circle and strikethrough text
+- Click again to mark as incomplete
+
+**Edit Tasks**
+<Steps>
+  <Step title="Expand task">
+    Click the expand icon (⤢) on any task.
+  </Step>
+
+  <Step title="Update details">
+    In the edit dialog, you can modify:
+    - **Title**: Change the task name
+    - **Description**: Update or add notes
+    - **Related Opportunity Link**: Add a URL linking to the opportunity
+  </Step>
+
+  <Step title="Save changes">
+    Click **"Save Changes"** to update the task.
+  </Step>
+</Steps>
+
+**Delete Tasks**
+- Click the trash icon (🗑️) on any task to delete it
+- Deletion is immediate and cannot be undone
+
+### Task Organization
+
+Tasks are automatically organized:
+- Incomplete tasks appear first
+- Completed tasks appear at the bottom
+- Sorted by creation date within each group
+
+<Tip>
+  Link tasks to specific opportunities using the "Related Opportunity Link" field. This helps you quickly access the opportunity details when working on the task.
+</Tip>
+
+## The Opportunity Tracker
+
+The tracker combines bookmarking and task management into a comprehensive application tracking system.
+
+### Tracker Features
+
+**Automatic Population**
+When you bookmark an opportunity, it's automatically added with:
+- Opportunity ID and title
+- Company/organization name
+- Logo/cover image
+- Opportunity type (hackathon, grant, competition, ideathon)
+- Location
+- Deadline
+- Initial status: "Not Applied"
+
+**Status Management**
+Track where you are in the application process:
+- Not Applied
+- Applied
+- In Review
+- Shortlisted
+- Accepted
+- Rejected
+
+**Notes and Updates**
+- Add personal notes to each tracked opportunity
+- Record application dates
+- Track results and outcomes
+- Store interview feedback or follow-up tasks
+
+<Note>
+  The tracker helps you maintain a complete history of your applications, making it easier to analyze patterns and improve your success rate.
+</Note>
+
+## Interaction Features
+
+Beyond bookmarking, opportunities support several engagement features:
+
+### Upvoting
+
+- Click the heart icon (❤️) to upvote opportunities you like
+- Upvotes help surface quality opportunities to other users
+- Click again to remove your upvote
+- Orange heart indicates you've upvoted
+
+### Commenting
+
+- Click the comment icon (💬) to view and add comments
+- Ask questions about the opportunity
+- Share insights or experiences
+- Connect with other interested users
+
+### Sharing
+
+- Click the share icon (🔗) to open sharing options
+- Copy the opportunity link to clipboard
+- Share on social media platforms
+- Send to friends or team members
+
+## Database Schema
+
+For technical understanding, here's how bookmarks and tasks are stored:
+
+### Bookmarks Table
+```sql
+bookmarks {
+  id: uuid (primary key)
+  userId: text (references user)
+  opportunityId: uuid (references opportunity)
+  createdAt: timestamp
+}
+```
+
+**Constraints:**
+- Unique combination of userId and opportunityId (one bookmark per opportunity per user)
+- Cascade delete when user or opportunity is deleted
+
+### Tasks Table
+```sql
+tasks {
+  id: uuid (primary key)
+  title: text (required)
+  description: text (optional)
+  opportunityLink: text (optional)
+  completed: boolean (default: false)
+  userId: text (references user)
+  createdAt: timestamp
+  updatedAt: timestamp
+}
+```
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Bookmark Liberally" icon="bookmark">
+    Don't hesitate to bookmark opportunities. You can always unbookmark later if you change your mind.
+  </Card>
+
+  <Card title="Create Specific Tasks" icon="list-check">
+    Break down applications into specific, actionable tasks like "Research company", "Draft cover letter", "Request recommendation".
+  </Card>
+
+  <Card title="Link Tasks to Opportunities" icon="link">
+    Always add the opportunity link when creating tasks. This saves time when you need to reference details.
+  </Card>
+
+  <Card title="Update Task Status" icon="circle-check">
+    Mark tasks complete as you finish them. It provides motivation and helps track progress.
+  </Card>
+
+  <Card title="Add Detailed Notes" icon="note-sticky">
+    Use the description field to record important details, deadlines, or requirements.
+  </Card>
+
+  <Card title="Regular Cleanup" icon="trash">
+    Delete completed tasks periodically to keep your list focused on current priorities.
+  </Card>
+</CardGroup>
+
+## Workflow Example
+
+Here's a typical workflow combining bookmarking and tasks:
+
+<Steps>
+  <Step title="Discover and bookmark">
+    Find an interesting hackathon opportunity and bookmark it. It's automatically added to your tracker with "Not Applied" status.
+  </Step>
+
+  <Step title="Create preparation tasks">
+    Create tasks:
+    - "Review hackathon requirements"
+    - "Form team of 4 members"
+    - "Brainstorm project ideas"
+    - "Prepare pitch deck"
+  </Step>
+
+  <Step title="Complete tasks progressively">
+    As you complete each task, mark it done. Update the task descriptions with notes or links.
+  </Step>
+
+  <Step title="Update tracker status">
+    Once you submit your application, update the tracker status from "Not Applied" to "Applied" and record the application date.
+  </Step>
+
+  <Step title="Track outcome">
+    When you hear back, update the status to "Shortlisted", "Accepted", or "Rejected" and add notes about the outcome.
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+**Bookmark icon not responding**
+- Ensure you're logged in
+- Check your internet connection
+- Refresh the page and try again
+
+**Can't see my bookmarked opportunities**
+- Navigate to your profile or tracker dashboard
+- Ensure you're logged in with the correct account
+- Check if the opportunity was deleted by its creator
+
+**Tasks not saving**
+- Title field is required - ensure it's not empty
+- Check your internet connection
+- Try refreshing the page
+
+**Task completion not updating**
+- Wait a moment for the animation to complete
+- Refresh the page if the update doesn't reflect
+- Check browser console for errors
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Create Opportunities" icon="plus" href="/guides/creating-opportunities">
+    Learn how to create and share your own opportunities
+  </Card>
+
+  <Card title="Purchase Toolkits" icon="shopping-cart" href="/guides/purchasing-toolkits">
+    Access premium learning content to boost your skills
+  </Card>
+</CardGroup>

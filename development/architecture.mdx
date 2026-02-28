@@ -1,0 +1,237 @@
+---
+title: "System Architecture"
+description: "Understanding FTB Hustle's architecture - Next.js App Router, database layer, authentication, and file organization"
+---
+
+## Overview
+
+FTB Hustle is built on **Next.js 15** with the **App Router**, leveraging React Server Components for optimal performance. The architecture follows modern web development best practices with clear separation of concerns.
+
+## Tech Stack Summary
+
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript 5
+- **Database**: PostgreSQL with Drizzle ORM
+- **Authentication**: Better Auth
+- **Styling**: Tailwind CSS 4
+- **UI Components**: Radix UI primitives
+
+## Project Structure
+
+```
+ftb-hustle/
+├── app/                    # Next.js App Router pages
+│   ├── api/               # API route handlers
+│   ├── (auth)/            # Authentication pages (login, signup)
+│   ├── opportunities/     # Opportunity management
+│   ├── internships/       # Internship listings
+│   ├── toolkit/           # Resource toolkits
+│   ├── tracker/           # Application tracker
+│   ├── profile/           # User profile
+│   └── layout.tsx         # Root layout
+├── components/            # React components
+│   ├── ui/               # Reusable UI components (Radix)
+│   ├── auth/             # Authentication components
+│   ├── opportunity/      # Opportunity-specific components
+│   ├── internship/       # Internship components
+│   ├── toolkit/          # Toolkit components
+│   └── tracker/          # Tracker components
+├── lib/                   # Core utilities and configurations
+│   ├── db.ts             # Database connection (Drizzle)
+│   ├── auth.ts           # Better Auth configuration
+│   ├── schema.ts         # Database schema definitions
+│   ├── queries.ts        # Database query functions
+│   ├── razorpay.ts       # Payment integration
+│   ├── appwrite.ts       # File storage client
+│   └── utils.ts          # Utility functions
+├── types/                 # TypeScript type definitions
+├── hooks/                 # Custom React hooks
+├── migrations/            # Drizzle database migrations
+├── middleware.ts          # Next.js middleware (auth, routing)
+└── public/                # Static assets
+```
+
+## Application Layers
+
+### 1. Presentation Layer (App Router)
+
+The `app/` directory contains all pages and layouts using Next.js App Router:
+
+- **Route Groups**: Auth-related pages use route groups for shared layouts
+- **Server Components**: Default rendering strategy for better performance
+- **Client Components**: Interactive components marked with `"use client"`
+- **API Routes**: RESTful endpoints in `app/api/`
+
+**Key Routes:**
+
+| Route | Purpose | Protected |
+|-------|---------|----------|
+| `/` | Homepage | No |
+| `/login`, `/signup` | Authentication | No |
+| `/opportunities` | Browse opportunities | Yes |
+| `/opportunities/[id]` | Opportunity details | Yes |
+| `/internships` | Internship listings | Yes |
+| `/toolkit` | Resource center | Yes |
+| `/tracker` | Application tracker | Yes |
+| `/profile` | User profile | Yes |
+
+### 2. Data Layer (Database)
+
+**Database Architecture:**
+
+- **ORM**: Drizzle ORM for type-safe database operations
+- **Database**: PostgreSQL (Neon serverless)
+- **Connection**: Dual drivers (HTTP for queries, WebSocket for transactions)
+
+**Database Configuration** (`lib/db.ts`):
+
+```typescript
+// HTTP driver for regular queries (fast, stateless)
+export const db = drizzleHttp(connectionString, { schema });
+
+// WebSocket pool driver for transactions
+const pool = new Pool({ connectionString });
+export const dbPool = drizzleWs(pool, { schema });
+```
+
+**Schema Organization** (`lib/schema.ts`):
+
+- User tables (users, accounts, sessions)
+- Opportunity tables (opportunities, applications, comments)
+- Internship tables (internships, saved internships)
+- Toolkit tables (toolkits, resources)
+- Tracker tables (applications, tasks)
+
+**Query Patterns:**
+
+- Organized query functions in `lib/queries.ts` and feature-specific query files
+- Use of React Query (@tanstack/react-query) for client-side state management
+- Server Actions for mutations
+
+### 3. Authentication Layer
+
+**Better Auth Configuration** (`lib/auth.ts`):
+
+- **Session Management**: Cookie-based sessions via `nextCookies()` plugin
+- **Email/Password**: Email verification with Resend
+- **Social OAuth**: Google and LinkedIn integration
+- **Database Adapter**: Drizzle adapter for user storage
+- **Role-Based Access**: Custom user roles (user, member, admin)
+
+**Middleware Protection** (`middleware.ts`):
+
+```typescript
+export const config = {
+  matcher: [
+    "/opportunities/:path*",
+    "/featured",
+    "/toolkit/:path*",
+    "/intern/:path*"
+  ],
+};
+```
+
+Protected routes automatically redirect unauthenticated users to login.
+
+### 4. Payment Layer
+
+**Razorpay Integration** (`lib/razorpay.ts`):
+
+- Order creation for premium features
+- Payment verification
+- Webhook handling for payment events
+
+### 5. File Storage Layer
+
+**Appwrite Configuration** (`lib/appwrite.ts`):
+
+- User avatar storage
+- Opportunity document uploads
+- Resume/CV storage
+- Image optimization
+
+### 6. UI Component Layer
+
+**Component Organization:**
+
+- **Base Components** (`components/ui/`): Radix UI primitives wrapped with Tailwind styles
+- **Feature Components**: Domain-specific components (auth, opportunity, toolkit)
+- **Layout Components**: Navbar, Footer, BottomNav
+- **Form Components**: React Hook Form with Zod validation
+
+**Styling Approach:**
+
+- Tailwind CSS 4 with custom configuration
+- Class variance authority (CVA) for component variants
+- `cn()` utility for conditional classes
+- Dark mode support via `next-themes`
+
+## Data Flow
+
+### Server-Side Rendering (SSR)
+
+1. User requests a page
+2. Next.js middleware checks authentication
+3. Server Component fetches data from database
+4. Page renders on server with data
+5. HTML sent to client with minimal JavaScript
+
+### Client-Side Interactions
+
+1. User interacts with Client Component
+2. React Query manages cache and refetching
+3. Server Actions handle mutations
+4. Optimistic updates provide instant feedback
+5. Background revalidation ensures data freshness
+
+## API Architecture
+
+API routes in `app/api/` follow RESTful conventions:
+
+- **GET**: Fetch resources
+- **POST**: Create resources
+- **PATCH**: Update resources
+- **DELETE**: Remove resources
+
+**Key API Routes:**
+
+- `/api/opportunities` - Opportunity CRUD
+- `/api/internships` - Internship data
+- `/api/tracker` - Application tracking
+- `/api/toolkits` - Resource management
+- `/api/profile` - User profile updates
+- `/api/auth/*` - Better Auth endpoints
+
+## Security Considerations
+
+1. **Authentication**: Session-based auth with HTTP-only cookies
+2. **Authorization**: Role-based access control (RBAC)
+3. **Input Validation**: Zod schemas for all user input
+4. **SQL Injection**: Prevented by Drizzle ORM's parameterized queries
+5. **XSS Protection**: React's built-in escaping + DOMPurify for rich text
+6. **CSRF**: Next.js CSRF protection in Server Actions
+7. **Environment Variables**: Sensitive data in `.env.local` (never committed)
+
+## Performance Optimizations
+
+- **Turbopack**: Fast development builds
+- **Image Optimization**: `next/image` with remote patterns
+- **Font Optimization**: `next/font` for web font loading
+- **Code Splitting**: Automatic with App Router
+- **React Server Components**: Reduced client-side JavaScript
+- **Database Connection Pooling**: Neon serverless with connection pooling
+- **Query Caching**: React Query for client-side caching
+
+## Error Handling
+
+- **Error Boundaries**: `error.tsx` files for graceful error UI
+- **API Errors**: Structured error responses with status codes
+- **Database Errors**: Try-catch blocks with fallback values
+- **Form Validation**: Client-side and server-side validation with Zod
+- **Toast Notifications**: User feedback via Sonner
+
+## Next Steps
+
+- Explore the [Tech Stack](/development/tech-stack) for detailed dependency information
+- Review [Local Setup](/development/setup) for development environment configuration
+- Check the [API Reference](/api/opportunities) for endpoint documentation

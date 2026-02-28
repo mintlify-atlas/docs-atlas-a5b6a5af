@@ -1,0 +1,543 @@
+---
+title: "User Management API"
+description: "API endpoints for user profiles, onboarding, and admin user management"
+---
+
+The User Management API provides endpoints for managing user profiles, onboarding data, and administrative user operations.
+
+## Authentication
+
+All User Management API endpoints require authentication with an active session.
+
+## Profile Management
+
+### Get Current User Profile
+
+<CodeGroup>
+```bash GET /api/profile
+curl -X GET "https://ftbhustle.com/api/profile" \
+  -H "Cookie: session=YOUR_SESSION_TOKEN"
+```
+</CodeGroup>
+
+Retrieve the current authenticated user's profile information.
+
+#### Response
+
+<ResponseField name="user" type="object">
+  User profile object
+  
+  <Expandable title="User Profile Object">
+    <ResponseField name="id" type="string">
+      Unique user identifier
+    </ResponseField>
+    
+    <ResponseField name="name" type="string">
+      User's full name
+    </ResponseField>
+    
+    <ResponseField name="email" type="string">
+      User's email address
+    </ResponseField>
+    
+    <ResponseField name="image" type="string">
+      Profile image URL
+    </ResponseField>
+    
+    <ResponseField name="fieldInterests" type="array">
+      Array of field interests
+    </ResponseField>
+    
+    <ResponseField name="opportunityInterests" type="array">
+      Array of opportunity interests
+    </ResponseField>
+    
+    <ResponseField name="dateOfBirth" type="string">
+      Date of birth
+    </ResponseField>
+    
+    <ResponseField name="collegeInstitute" type="string">
+      College or institute name
+    </ResponseField>
+    
+    <ResponseField name="contactNumber" type="string">
+      Contact phone number (10 digits)
+    </ResponseField>
+    
+    <ResponseField name="currentRole" type="string">
+      Current role or position
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "user": {
+    "id": "user123",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "image": "https://example.com/avatar.jpg",
+    "fieldInterests": ["Technology", "AI", "Web Development"],
+    "opportunityInterests": ["hackathon", "internship"],
+    "dateOfBirth": "2000-05-15",
+    "collegeInstitute": "IIT Delhi",
+    "contactNumber": "9876543210",
+    "currentRole": "Computer Science Student"
+  }
+}
+```
+</ResponseExample>
+
+### Update User Profile
+
+<CodeGroup>
+```bash POST /api/profile
+curl -X POST "https://ftbhustle.com/api/profile" \
+  -H "Cookie: session=YOUR_SESSION_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John Doe",
+    "fieldInterests": ["AI", "Web Development"],
+    "contactNumber": "9876543210",
+    "collegeInstitute": "IIT Delhi"
+  }'
+```
+</CodeGroup>
+
+Update the current user's profile information.
+
+#### Request Body
+
+<ParamField body="name" type="string" required>
+  User's full name
+</ParamField>
+
+<ParamField body="image" type="string">
+  Profile image URL
+</ParamField>
+
+<ParamField body="fieldInterests" type="array">
+  Array of field interest strings
+</ParamField>
+
+<ParamField body="opportunityInterests" type="array">
+  Array of opportunity interest strings
+</ParamField>
+
+<ParamField body="dateOfBirth" type="string">
+  Date of birth (YYYY-MM-DD format)
+</ParamField>
+
+<ParamField body="collegeInstitute" type="string">
+  College or institute name (alphanumeric with spaces and common punctuation)
+</ParamField>
+
+<ParamField body="contactNumber" type="string">
+  10-digit phone number
+</ParamField>
+
+<ParamField body="currentRole" type="string">
+  Current role or position (max 60 characters)
+</ParamField>
+
+#### Response
+
+<ResponseField name="user" type="object">
+  The updated user profile object
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "user": {
+    "id": "user123",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "image": null,
+    "fieldInterests": ["AI", "Web Development"],
+    "opportunityInterests": [],
+    "dateOfBirth": null,
+    "collegeInstitute": "IIT Delhi",
+    "contactNumber": "9876543210",
+    "currentRole": null
+  }
+}
+```
+</ResponseExample>
+
+#### Validation Rules
+
+- **name**: Required, non-empty string
+- **image**: Optional string
+- **fieldInterests**: Array of strings
+- **opportunityInterests**: Array of strings
+- **dateOfBirth**: Valid date string
+- **collegeInstitute**: Alphanumeric with spaces, `.&'()-` allowed, cannot be all numbers
+- **contactNumber**: Exactly 10 digits
+- **currentRole**: Max 60 characters
+
+## Onboarding
+
+### Get Onboarding Profile
+
+<CodeGroup>
+```bash GET /api/onboarding
+curl -X GET "https://ftbhustle.com/api/onboarding" \
+  -H "Cookie: session=YOUR_SESSION_TOKEN"
+```
+</CodeGroup>
+
+Retrieve the current user's onboarding profile.
+
+#### Response
+
+<ResponseField name="profile" type="object">
+  Onboarding profile object (null if not completed)
+  
+  <Expandable title="Onboarding Profile Object">
+    <ResponseField name="id" type="string">
+      Profile ID
+    </ResponseField>
+    
+    <ResponseField name="userId" type="string">
+      User ID
+    </ResponseField>
+    
+    <ResponseField name="persona" type="string">
+      User persona: `student` or `society`
+    </ResponseField>
+    
+    <ResponseField name="locationType" type="string">
+      Location type: `city` or `state`
+    </ResponseField>
+    
+    <ResponseField name="locationValue" type="string">
+      Location value
+    </ResponseField>
+    
+    <ResponseField name="educationLevel" type="string">
+      Education level
+    </ResponseField>
+    
+    <ResponseField name="fieldOfStudy" type="string">
+      Field of study
+    </ResponseField>
+    
+    <ResponseField name="fieldOther" type="string">
+      Custom field of study (when fieldOfStudy is "Other")
+    </ResponseField>
+    
+    <ResponseField name="opportunityInterests" type="array">
+      Array of opportunity interests
+    </ResponseField>
+    
+    <ResponseField name="domainPreferences" type="array">
+      Array of domain preferences
+    </ResponseField>
+    
+    <ResponseField name="struggles" type="array">
+      Array of user struggles
+    </ResponseField>
+    
+    <ResponseField name="createdAt" type="string">
+      Creation timestamp
+    </ResponseField>
+    
+    <ResponseField name="updatedAt" type="string">
+      Last update timestamp
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "profile": {
+    "id": "profile-123",
+    "userId": "user123",
+    "persona": "student",
+    "locationType": "city",
+    "locationValue": "Mumbai",
+    "educationLevel": "undergraduate",
+    "fieldOfStudy": "Computer Science",
+    "fieldOther": null,
+    "opportunityInterests": ["internship", "hackathon"],
+    "domainPreferences": ["AI", "Web Development"],
+    "struggles": ["Finding relevant opportunities", "Time management"],
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-01-15T10:00:00Z"
+  }
+}
+```
+</ResponseExample>
+
+### Create or Update Onboarding Profile
+
+<CodeGroup>
+```bash POST /api/onboarding
+curl -X POST "https://ftbhustle.com/api/onboarding" \
+  -H "Cookie: session=YOUR_SESSION_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "persona": "student",
+    "locationType": "city",
+    "locationValue": "Mumbai",
+    "educationLevel": "undergraduate",
+    "fieldOfStudy": "Computer Science",
+    "opportunityInterests": ["internship", "hackathon"],
+    "domainPreferences": ["AI", "Web Development"],
+    "struggles": ["Finding relevant opportunities"]
+  }'
+```
+</CodeGroup>
+
+Create or update the user's onboarding profile.
+
+#### Request Body
+
+<ParamField body="persona" type="string" required>
+  User persona: `student` or `society`
+</ParamField>
+
+<ParamField body="locationType" type="string">
+  Location type: `city` or `state` (student only)
+</ParamField>
+
+<ParamField body="locationValue" type="string">
+  Location value (student only)
+</ParamField>
+
+<ParamField body="educationLevel" type="string">
+  Education level (student only)
+</ParamField>
+
+<ParamField body="fieldOfStudy" type="string">
+  Field of study (student only)
+</ParamField>
+
+<ParamField body="fieldOther" type="string">
+  Custom field of study when fieldOfStudy is "Other" (student only)
+</ParamField>
+
+<ParamField body="opportunityInterests" type="array">
+  Array of opportunity interest strings (student only)
+</ParamField>
+
+<ParamField body="domainPreferences" type="array">
+  Array of domain preference strings (student only)
+</ParamField>
+
+<ParamField body="struggles" type="array">
+  Array of struggle strings (student only)
+</ParamField>
+
+#### Response
+
+<ResponseField name="profile" type="object">
+  The created or updated onboarding profile
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "profile": {
+    "id": "profile-123",
+    "persona": "student",
+    "locationType": "city",
+    "locationValue": "Mumbai",
+    "educationLevel": "undergraduate",
+    "fieldOfStudy": "Computer Science",
+    "fieldOther": null,
+    "opportunityInterests": ["internship", "hackathon"],
+    "domainPreferences": ["AI", "Web Development"],
+    "struggles": ["Finding relevant opportunities"],
+    "createdAt": "2024-03-15T14:30:00Z",
+    "updatedAt": "2024-03-15T14:30:00Z"
+  }
+}
+```
+</ResponseExample>
+
+## Admin User Management
+
+### List All Users
+
+<CodeGroup>
+```bash GET /api/admin/users
+curl -X GET "https://ftbhustle.com/api/admin/users" \
+  -H "Cookie: session=YOUR_SESSION_TOKEN"
+```
+</CodeGroup>
+
+Retrieve a list of all users. Admin only.
+
+#### Response
+
+<ResponseField name="users" type="array">
+  Array of user objects
+  
+  <Expandable title="User Object">
+    <ResponseField name="id" type="string">
+      User ID
+    </ResponseField>
+    
+    <ResponseField name="name" type="string">
+      User name
+    </ResponseField>
+    
+    <ResponseField name="email" type="string">
+      User email
+    </ResponseField>
+    
+    <ResponseField name="role" type="string">
+      User role: `user`, `member`, or `admin`
+    </ResponseField>
+    
+    <ResponseField name="image" type="string">
+      Profile image URL
+    </ResponseField>
+    
+    <ResponseField name="createdAt" type="string">
+      Account creation timestamp
+    </ResponseField>
+    
+    <ResponseField name="emailVerified" type="boolean">
+      Email verification status
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "users": [
+    {
+      "id": "user123",
+      "name": "John Doe",
+      "email": "john@example.com",
+      "role": "user",
+      "image": "https://example.com/avatar.jpg",
+      "createdAt": "2024-01-15T10:00:00Z",
+      "emailVerified": true
+    },
+    {
+      "id": "user456",
+      "name": "Jane Smith",
+      "email": "jane@example.com",
+      "role": "admin",
+      "image": "https://example.com/avatar2.jpg",
+      "createdAt": "2023-12-01T08:00:00Z",
+      "emailVerified": true
+    }
+  ]
+}
+```
+</ResponseExample>
+
+### Update User Role
+
+<CodeGroup>
+```bash PATCH /api/admin/users/{id}
+curl -X PATCH "https://ftbhustle.com/api/admin/users/user123" \
+  -H "Cookie: session=YOUR_SESSION_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "role": "member"
+  }'
+```
+</CodeGroup>
+
+Update a user's role. Admin only.
+
+#### Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the user to update
+</ParamField>
+
+#### Request Body
+
+<ParamField body="role" type="string" required>
+  New role: `user`, `member`, or `admin`
+</ParamField>
+
+#### Response
+
+<ResponseField name="user" type="object">
+  The updated user object
+  
+  <Expandable title="User Object">
+    <ResponseField name="id" type="string">
+      User ID
+    </ResponseField>
+    
+    <ResponseField name="name" type="string">
+      User name
+    </ResponseField>
+    
+    <ResponseField name="email" type="string">
+      User email
+    </ResponseField>
+    
+    <ResponseField name="role" type="string">
+      Updated user role
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "user": {
+    "id": "user123",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "role": "member"
+  }
+}
+```
+</ResponseExample>
+
+#### Restrictions
+
+- Admins cannot change their own role
+- Role must be one of: `user`, `member`, `admin`
+
+## User Roles
+
+<CardGroup cols={3}>
+  <Card title="User" icon="user">
+    Regular users with basic access. Created opportunities require approval before being published.
+  </Card>
+  
+  <Card title="Member" icon="user-check">
+    Trusted members who can publish opportunities directly without approval.
+  </Card>
+  
+  <Card title="Admin" icon="user-shield">
+    Full access to all features including user management, content moderation, and administrative functions.
+  </Card>
+</CardGroup>
+
+## Error Responses
+
+All API endpoints return appropriate HTTP status codes:
+
+- **401 Unauthorized**: User is not authenticated
+- **403 Forbidden**: User doesn't have required permissions
+- **404 Not Found**: User or resource not found
+- **400 Bad Request**: Validation error or invalid input
+- **500 Internal Server Error**: Server error
+
+```json Error Response Example
+{
+  "error": "Invalid role. Must be 'user', 'member', or 'admin'"
+}
+```
+
+```json Validation Error Response
+{
+  "error": "Invalid contactNumber"
+}
+```

@@ -1,0 +1,156 @@
+---
+title: Welcome to FTB Hustle
+description: Discover opportunities built for ambitious students - hackathons, grants, competitions, internships, and curated learning resources.
+---
+
+# Welcome to FTB Hustle
+
+Because the right opportunity changes everything.
+
+<img
+  className="block"
+  src="/images/hero.png"
+  alt="FTB Hustle Hero"
+/>
+
+## What is FTB Hustle?
+
+FTB Hustle is a platform designed specifically for ambitious students who want to level up their careers. We help you discover hackathons, grants, competitions, internships, scholarships, and curated learning resources - all in one place.
+
+<Note>
+  **Built for students, by students.** Every feature is designed to help you find opportunities faster, stay organized, and never miss a deadline.
+</Note>
+
+## Why FTB Hustle?
+
+The opportunity landscape is scattered and overwhelming. You're checking multiple sites, missing deadlines, and losing track of what you bookmarked. FTB Hustle solves this.
+
+<CardGroup cols={2}>
+  <Card title="Discover Opportunities" icon="compass">
+    Access a curated feed of hackathons, grants, competitions, internships, and scholarships. Filter by type, deadline, location, and your interests.
+  </Card>
+  <Card title="Stay Organized" icon="bookmark">
+    Bookmark opportunities you care about and track your application status. Our intelligent tracker helps you manage deadlines and next steps.
+  </Card>
+  <Card title="Learn & Grow" icon="graduation-cap">
+    Access curated toolkits with video lessons, resources, and step-by-step guides to level up your skills in product, design, engineering, and more.
+  </Card>
+  <Card title="Get Unblocked" icon="lightbulb">
+    Browse our Ungatekeep section for insider tips, resources, and advice from students who've been there - all designed to help you get unstuck fast.
+  </Card>
+</CardGroup>
+
+## Key Features
+
+### Personalized Opportunity Feed
+
+After a quick onboarding (~60 seconds), we personalize your feed based on:
+- Your role (student or society member)
+- Education level and field of study
+- Location preferences (state or city)
+- Opportunity interests (internships, hackathons, scholarships, etc.)
+- Domain preferences (AI/ML, Web Dev, Product Management, etc.)
+
+```typescript
+// Your profile shapes what you see
+const profile = {
+  persona: "student",
+  educationLevel: "Undergraduate",
+  fieldOfStudy: "Computer Science",
+  opportunityInterests: ["Internships", "Hackathons", "Scholarships"],
+  domainPreferences: ["AI/ML", "Web Development"],
+  location: "Maharashtra"
+}
+```
+
+### Smart Application Tracker
+
+Keep track of every opportunity you're pursuing:
+- Bookmark opportunities with one click
+- Track application status (Not Applied, Applied, Interview, Offer, Rejected)
+- Set custom notes and reminders
+- View all deadlines in one place
+- Sync with calendar events
+
+### Curated Learning Toolkits
+
+Access structured learning paths created by industry experts:
+- Video lessons and tutorials
+- Downloadable resources and templates
+- Progress tracking across lessons
+- Premium content with verification codes
+- Organized by topic and difficulty level
+
+### Ungatekeep Resources
+
+Get insider knowledge and resources that typically stay hidden:
+- Resume templates and examples
+- Interview preparation guides
+- Portfolio projects and case studies
+- Career roadmaps and skill trees
+- Community-shared tips and tricks
+
+## How It Works
+
+<Steps>
+  <Step title="Sign Up & Onboard">
+    Create your account in seconds using Google or LinkedIn. Complete a quick onboarding to personalize your feed.
+  </Step>
+  <Step title="Explore Opportunities">
+    Browse opportunities tailored to your interests. Filter by type, deadline, location, and tags.
+  </Step>
+  <Step title="Bookmark & Track">
+    Bookmark opportunities you want to apply to. Track your application status and deadlines in one place.
+  </Step>
+  <Step title="Learn & Apply">
+    Access curated toolkits to level up your skills. Apply to opportunities with confidence.
+  </Step>
+</Steps>
+
+## Who Is This For?
+
+<AccordionGroup>
+  <Accordion title="Students">
+    Perfect for undergrad and graduate students looking for internships, hackathons, scholarships, and learning resources. Set up your profile to get personalized recommendations based on your field and interests.
+  </Accordion>
+  <Accordion title="Society Members">
+    If you run a student society or club, you can share opportunities and stay updated on what's available for your community. The platform is optimized for students, but you can still browse and bookmark.
+  </Accordion>
+  <Accordion title="Career Switchers">
+    If you're transitioning into tech or another field, our toolkits and resources help you learn the skills you need and discover opportunities to gain experience.
+  </Accordion>
+</AccordionGroup>
+
+## Platform Tech Stack
+
+<Note>
+  FTB Hustle is built with modern, performant technologies for the best user experience.
+</Note>
+
+Our platform is powered by:
+- **Next.js 15** with App Router for blazing-fast navigation
+- **TypeScript** for type-safe development
+- **Better Auth** for secure authentication with Google and LinkedIn OAuth
+- **PostgreSQL + Drizzle ORM** for reliable data management
+- **Tailwind CSS 4** for beautiful, responsive design
+- **React Query** for efficient data fetching and caching
+- **Radix UI** for accessible component primitives
+
+## What's Next?
+
+<CardGroup cols={2}>
+  <Card title="Quickstart Guide" icon="rocket" href="/quickstart">
+    Get started in under 5 minutes - from signup to your first bookmarked opportunity.
+  </Card>
+  <Card title="Authentication" icon="lock" href="/authentication">
+    Learn how authentication works, including OAuth providers and email verification.
+  </Card>
+</CardGroup>
+
+<Warning>
+  **Platform is Free:** FTB Hustle is completely free for students. No credit card required, no hidden fees.
+</Warning>
+
+---
+
+Ready to get started? Head to the [Quickstart Guide](/quickstart) to create your account and discover your first opportunity.

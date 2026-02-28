@@ -1,0 +1,726 @@
+---
+title: Authentication
+description: Learn how FTB Hustle implements secure authentication with Better Auth, including OAuth providers, email verification, and password reset flows.
+---
+
+# Authentication
+
+FTB Hustle uses [Better Auth](https://better-auth.com) for secure, modern authentication. This guide covers our implementation, OAuth providers, and email verification flows.
+
+<Note>
+  **Supported Authentication Methods:**
+  - Google OAuth 2.0
+  - LinkedIn OAuth 2.0
+  - Email & Password (with verification)
+</Note>
+
+## Authentication Architecture
+
+### Tech Stack
+
+Our authentication system is built with:
+- **Better Auth:** Modern auth library for Next.js
+- **Drizzle ORM:** Type-safe database operations
+- **PostgreSQL:** Reliable user data storage
+- **Resend:** Transactional email service
+- **React Email:** Beautiful email templates
+
+```typescript
+// lib/auth.ts - Server-side auth configuration
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { nextCookies } from "better-auth/next-js";
+import { db } from "./db";
+import { schema } from "./schema";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+export const auth = betterAuth({
+  user: {
+    additionalFields: {
+      role: {
+        type: ["user", "member", "admin"],
+        required: false,
+        defaultValue: "user",
+        input: false
+      }
+    }
+  },
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url }) => {
+      await resend.emails.send({
+        from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
+        to: user.email,
+        subject: "Verify your email",
+        react: VerifyEmail({ username: user.name, verifyUrl: url })
+      });
+    },
+    sendOnSignUp: true
+  },
+  emailAndPassword: {
+    enabled: true,
+    requireEmailVerification: true
+  },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!
+    },
+    linkedin: {
+      clientId: process.env.LINKEDIN_CLIENT_ID!,
+      clientSecret: process.env.LINKEDIN_CLIENT_SECRET!
+    }
+  },
+  database: drizzleAdapter(db, {
+    provider: "pg",
+    schema
+  }),
+  plugins: [nextCookies()]
+});
+```
+
+### Client-Side Setup
+
+```typescript
+// lib/auth-client.ts - Client-side auth client
+import { createAuthClient } from "better-auth/react";
+
+export const authClient = createAuthClient({
+  baseURL: process.env.NEXT_PUBLIC_APP_URL
+});
+```
+
+## Google OAuth Integration
+
+Google OAuth is the recommended sign-in method for fastest onboarding.
+
+### Implementation
+
+```typescript
+// components/auth/login-form.tsx
+const signInWithGoogle = async () => {
+  try {
+    setIsLoading(true);
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: returnUrl,
+      newUserCallbackURL: "/onboarding"
+    });
+  } catch (error) {
+    console.error("Google sign-in error:", error);
+    toast.error("Google sign-in failed. Please try again.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+```
+
+### Setup Instructions
+
+<Steps>
+  <Step title="Create Google OAuth App">
+    Go to [Google Cloud Console](https://console.cloud.google.com) and create a new project.
+  </Step>
+  <Step title="Enable Google+ API">
+    Navigate to "APIs & Services" > "Library" and enable the Google+ API.
+  </Step>
+  <Step title="Create OAuth Credentials">
+    Go to "Credentials" > "Create Credentials" > "OAuth client ID".
+    - Application type: Web application
+    - Authorized redirect URIs: `https://yourdomain.com/api/auth/callback/google`
+  </Step>
+  <Step title="Add to Environment Variables">
+    Copy the Client ID and Client Secret to your `.env.local` file:
+    ```bash
+    GOOGLE_CLIENT_ID=your_client_id
+    GOOGLE_CLIENT_SECRET=your_client_secret
+    ```
+  </Step>
+</Steps>
+
+### OAuth Flow
+
+<Steps>
+  <Step title="User clicks 'Login with Google'">
+    The `signInWithGoogle` function is triggered.
+  </Step>
+  <Step title="Redirect to Google">
+    User is redirected to Google's OAuth consent screen.
+  </Step>
+  <Step title="User authorizes">
+    User grants permission for FTB Hustle to access basic profile info.
+  </Step>
+  <Step title="Callback to our server">
+    Google redirects back to `/api/auth/callback/google` with auth code.
+  </Step>
+  <Step title="Session created">
+    Better Auth exchanges the code for tokens and creates a session.
+  </Step>
+  <Step title="User redirected">
+    - New users → `/onboarding`
+    - Returning users → `/opportunities` (or `returnUrl`)
+  </Step>
+</Steps>
+
+<Note>
+  **New vs Returning Users:** We detect new users by comparing `createdAt` and `updatedAt` timestamps. New users are redirected to onboarding.
+</Note>
+
+## LinkedIn OAuth Integration
+
+LinkedIn OAuth is ideal for professionals and students building their network.
+
+### Implementation
+
+```typescript
+const signInWithLinkedIn = async () => {
+  try {
+    setIsLoading(true);
+    await authClient.signIn.social({
+      provider: "linkedin",
+      callbackURL: returnUrl,
+      newUserCallbackURL: "/onboarding"
+    });
+  } catch (error) {
+    console.error("LinkedIn sign-in error:", error);
+    toast.error("LinkedIn sign-in failed. Please try again.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+```
+
+### Setup Instructions
+
+<Steps>
+  <Step title="Create LinkedIn App">
+    Go to [LinkedIn Developers](https://www.linkedin.com/developers/) and create a new app.
+  </Step>
+  <Step title="Request OAuth 2.0 scopes">
+    Request the following permissions:
+    - `r_liteprofile` (name, profile picture)
+    - `r_emailaddress` (email address)
+  </Step>
+  <Step title="Configure Redirect URLs">
+    Add authorized redirect URL: `https://yourdomain.com/api/auth/callback/linkedin`
+  </Step>
+  <Step title="Add to Environment Variables">
+    ```bash
+    LINKEDIN_CLIENT_ID=your_client_id
+    LINKEDIN_CLIENT_SECRET=your_client_secret
+    ```
+  </Step>
+</Steps>
+
+<Warning>
+  LinkedIn OAuth requires your app to be verified if you want to access certain scopes. For basic profile info, verification isn't required.
+</Warning>
+
+## Email & Password Authentication
+
+Email/password auth includes built-in validation, hashing, and email verification.
+
+### Sign Up Flow
+
+```typescript
+// components/auth/signup-form.tsx
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const formSchema = z.object({
+  username: z.string().min(3),
+  email: z.string().email(),
+  password: z.string().min(8)
+});
+
+type FormData = z.infer<typeof formSchema>;
+
+const form = useForm<FormData>({
+  resolver: zodResolver(formSchema),
+  defaultValues: {
+    username: "",
+    email: "",
+    password: ""
+  }
+});
+
+async function onSubmit(values: FormData) {
+  setIsLoading(true);
+
+  try {
+    await authClient.signUp.email(
+      {
+        email: values.email,
+        password: values.password,
+        name: values.username,
+        callbackURL: "/dashboard"
+      },
+      {
+        onSuccess: (ctx) => {
+          const isNewUser = 
+            ctx.data?.user?.createdAt === ctx.data?.user?.updatedAt;
+
+          if (isNewUser) {
+            router.push("/onboarding");
+          } else {
+            router.push("/dashboard");
+          }
+        }
+      }
+    );
+
+    toast.success("Account created. Redirecting...");
+  } catch (error) {
+    console.error("Signup error:", error);
+    toast.error("Signup failed. Please try again.");
+  } finally {
+    setIsLoading(false);
+  }
+}
+```
+
+### Login Flow
+
+```typescript
+// components/auth/login-form.tsx
+const formSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8)
+});
+
+async function onSubmit(values: z.infer<typeof formSchema>) {
+  setIsLoading(true);
+
+  try {
+    await authClient.signIn.email(
+      {
+        email: values.email,
+        password: values.password
+      },
+      {
+        onSuccess: async (ctx) => {
+          // Check if user has completed onboarding
+          try {
+            const response = await fetch("/api/onboarding");
+            const data = await response.json();
+
+            const hasCompletedOnboarding = !!data.profile;
+
+            if (hasCompletedOnboarding) {
+              router.push(returnUrl);
+            } else {
+              // Fallback to timestamp comparison
+              const createdAt = ctx.data?.user?.createdAt;
+              const updatedAt = ctx.data?.user?.updatedAt;
+
+              const isNewUser = createdAt && updatedAt
+                ? new Date(createdAt).getTime() === new Date(updatedAt).getTime()
+                : false;
+
+              router.push(isNewUser ? "/onboarding" : returnUrl);
+            }
+          } catch (error) {
+            console.error("Error checking onboarding status:", error);
+            router.push(returnUrl);
+          }
+        }
+      }
+    );
+    toast.success("Logged in. Redirecting...");
+  } catch (error) {
+    console.error("Login error:", error);
+    toast.error("Login failed. Please try again.");
+  } finally {
+    setIsLoading(false);
+  }
+}
+```
+
+<Note>
+  **Password Requirements:** Minimum 8 characters. Passwords are hashed using bcrypt before storage.
+</Note>
+
+## Email Verification
+
+Email verification is required for all email/password signups to ensure account security.
+
+### Verification Email Template
+
+```tsx
+// components/auth/verify-email.tsx
+import * as React from "react";
+import {
+  Html, Head, Body, Container, Section, Text, Button, Hr, Tailwind
+} from "@react-email/components";
+
+interface VerifyEmailProps {
+  username: string;
+  verifyUrl: string;
+}
+
+const VerifyEmail = ({ username, verifyUrl }: VerifyEmailProps) => {
+  return (
+    <Html lang="en" dir="ltr">
+      <Tailwind>
+        <Head />
+        <Body className="bg-gray-100 font-sans py-[40px]">
+          <Container className="bg-white rounded-[8px] p-[32px] max-w-[600px] mx-auto">
+            <Section>
+              <Text className="text-[24px] font-bold text-gray-900 mb-[16px]">
+                Verify your email address
+              </Text>
+
+              <Text className="text-[16px] text-gray-700 mb-[24px]">
+                Thanks {username} for signing up! To complete your registration
+                and secure your account, please verify your email address by
+                clicking the button below.
+              </Text>
+
+              <Section className="text-center mb-[32px]">
+                <Button
+                  href={verifyUrl}
+                  className="bg-blue-600 text-white px-[32px] py-[12px] rounded-[6px]"
+                >
+                  Verify Email Address
+                </Button>
+              </Section>
+
+              <Text className="text-[14px] text-gray-600">
+                If the button doesn't work, copy and paste this link:
+                <br />
+                {verifyUrl}
+              </Text>
+
+              <Text className="text-[14px] text-gray-600">
+                This verification link will expire in 24 hours.
+              </Text>
+            </Section>
+          </Container>
+        </Body>
+      </Tailwind>
+    </Html>
+  );
+};
+
+export default VerifyEmail;
+```
+
+### Sending Verification Emails
+
+```typescript
+// lib/auth.ts - Email verification config
+emailVerification: {
+  sendVerificationEmail: async ({ user, url }) => {
+    await resend.emails.send({
+      from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
+      to: user.email,
+      subject: "Verify your email",
+      react: VerifyEmail({ 
+        username: user.name, 
+        verifyUrl: url 
+      })
+    });
+  },
+  sendOnSignUp: true  // Automatically send on signup
+}
+```
+
+### Email Configuration
+
+<Steps>
+  <Step title="Sign up for Resend">
+    Create an account at [resend.com](https://resend.com)
+  </Step>
+  <Step title="Verify your domain">
+    Add DNS records to verify your sending domain.
+  </Step>
+  <Step title="Create API key">
+    Generate an API key from the Resend dashboard.
+  </Step>
+  <Step title="Add to environment variables">
+    ```bash
+    RESEND_API_KEY=your_api_key
+    EMAIL_SENDER_NAME="FTB Hustle"
+    EMAIL_SENDER_ADDRESS="noreply@yourdomain.com"
+    ```
+  </Step>
+</Steps>
+
+<Warning>
+  **Email Deliverability:** Make sure to verify your domain with Resend to avoid emails landing in spam. Test with your own email first.
+</Warning>
+
+## Password Reset Flow
+
+Users can reset their password if they forget it.
+
+### Forgot Password Form
+
+```typescript
+// components/auth/forgot-password-form.tsx
+const formSchema = z.object({
+  email: z.string().email()
+});
+
+async function onSubmit(values: z.infer<typeof formSchema>) {
+  setIsLoading(true);
+
+  try {
+    await authClient.forgetPassword({
+      email: values.email,
+      redirectTo: "/reset-password"
+    });
+
+    toast.success("Password reset email sent. Check your inbox.");
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    toast.error("Failed to send reset email.");
+  } finally {
+    setIsLoading(false);
+  }
+}
+```
+
+### Reset Password Email
+
+```tsx
+// components/auth/reset-password.tsx
+const ForgotPasswordEmail = ({ 
+  username, 
+  resetUrl, 
+  userEmail 
+}: ForgotPasswordEmailProps) => {
+  return (
+    <Html>
+      <Tailwind>
+        <Body>
+          <Container>
+            <Text className="text-[24px] font-bold">
+              Reset your password
+            </Text>
+            <Text>
+              Hi {username}, we received a request to reset your password.
+            </Text>
+            <Button href={resetUrl}>
+              Reset Password
+            </Button>
+            <Text>
+              If you didn't request this, you can safely ignore this email.
+            </Text>
+          </Container>
+        </Body>
+      </Tailwind>
+    </Html>
+  );
+};
+```
+
+### Sending Reset Emails
+
+```typescript
+// lib/auth.ts - Password reset config
+emailAndPassword: {
+  enabled: true,
+  sendResetPassword: async ({ user, url }) => {
+    await resend.emails.send({
+      from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
+      to: user.email,
+      subject: "Reset your password",
+      react: ForgotPasswordEmail({
+        username: user.name,
+        resetUrl: url,
+        userEmail: user.email
+      })
+    });
+  },
+  requireEmailVerification: true
+}
+```
+
+## Session Management
+
+Better Auth handles sessions using secure HTTP-only cookies.
+
+### Accessing Session Data
+
+```typescript
+// Using the useSession hook (client-side)
+import { useSession } from "@/hooks/use-session";
+
+function MyComponent() {
+  const { data: session, status } = useSession();
+
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  }
+
+  if (!session) {
+    return <div>Not logged in</div>;
+  }
+
+  return (
+    <div>
+      Welcome, {session.user.name}!
+      <p>Email: {session.user.email}</p>
+      <p>Role: {session.user.role}</p>
+    </div>
+  );
+}
+```
+
+### Server-Side Session Access
+
+```typescript
+// In API routes or Server Components
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+
+export async function GET() {
+  const session = await auth.api.getSession({
+    headers: await headers()
+  });
+
+  if (!session) {
+    return Response.json(
+      { error: "Unauthorized" }, 
+      { status: 401 }
+    );
+  }
+
+  // Access user data
+  const userId = session.user.id;
+  const userRole = session.user.role;
+
+  // Your logic here
+}
+```
+
+### Sign Out
+
+```typescript
+const handleSignOut = async () => {
+  await authClient.signOut({
+    fetchOptions: {
+      onSuccess: () => {
+        router.push("/");
+        toast.success("Signed out successfully");
+      }
+    }
+  });
+};
+```
+
+## Database Schema
+
+Better Auth automatically creates and manages the following tables:
+
+```typescript
+// lib/schema.ts - User schema
+export const user = pgTable("user", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  emailVerified: boolean("email_verified").notNull().default(false),
+  image: text("image"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  // Custom field
+  role: text("role", { enum: ["user", "member", "admin"] })
+    .default("user")
+});
+
+// Additional tables managed by Better Auth:
+// - session
+// - account (for OAuth providers)
+// - verification (for email verification tokens)
+```
+
+## Security Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Password Hashing" icon="lock">
+    All passwords are hashed using bcrypt with salt rounds before storage. Never store plaintext passwords.
+  </Card>
+  <Card title="HTTPS Only" icon="shield">
+    All authentication flows require HTTPS in production. Cookies are marked as secure and HTTP-only.
+  </Card>
+  <Card title="CSRF Protection" icon="shield-check">
+    Better Auth includes built-in CSRF protection for all auth endpoints.
+  </Card>
+  <Card title="Email Verification" icon="envelope-check">
+    Required for email/password signups. Verification links expire after 24 hours.
+  </Card>
+</CardGroup>
+
+## Environment Variables
+
+Complete list of required environment variables:
+
+```bash
+# App URL
+NEXT_PUBLIC_APP_URL=https://yourdomain.com
+
+# Database
+DATABASE_URL=postgresql://user:password@host:port/database
+
+# Better Auth Secret
+BETTER_AUTH_SECRET=your_random_secret_key
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+# LinkedIn OAuth
+LINKEDIN_CLIENT_ID=your_linkedin_client_id
+LINKEDIN_CLIENT_SECRET=your_linkedin_client_secret
+
+# Email (Resend)
+RESEND_API_KEY=your_resend_api_key
+EMAIL_SENDER_NAME="FTB Hustle"
+EMAIL_SENDER_ADDRESS=noreply@yourdomain.com
+```
+
+## API Routes
+
+Better Auth provides the following API routes automatically:
+
+- `POST /api/auth/sign-in/email` - Email/password login
+- `POST /api/auth/sign-up/email` - Email/password signup
+- `GET /api/auth/sign-in/social` - OAuth login (Google, LinkedIn)
+- `POST /api/auth/sign-out` - Sign out
+- `GET /api/auth/session` - Get current session
+- `POST /api/auth/forget-password` - Request password reset
+- `POST /api/auth/reset-password` - Reset password
+- `GET /api/auth/verify-email` - Verify email address
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="OAuth redirect not working">
+    - Verify redirect URIs match exactly in OAuth provider settings
+    - Check that `NEXT_PUBLIC_APP_URL` is set correctly
+    - Ensure cookies are enabled in browser
+  </Accordion>
+  <Accordion title="Verification email not received">
+    - Check spam folder
+    - Verify Resend domain is authenticated
+    - Check Resend dashboard for delivery logs
+    - Ensure `EMAIL_SENDER_ADDRESS` matches verified domain
+  </Accordion>
+  <Accordion title="Session not persisting">
+    - Check that cookies are enabled
+    - Verify `BETTER_AUTH_SECRET` is set
+    - Ensure app is running on HTTPS in production
+  </Accordion>
+  <Accordion title="Password reset not working">
+    - Verify email is registered
+    - Check that reset token hasn't expired (24 hours)
+    - Ensure `redirectTo` URL is correct
+  </Accordion>
+</AccordionGroup>
+
+---
+
+You now have a complete understanding of FTB Hustle's authentication system. For more information, visit the [Better Auth documentation](https://better-auth.com).

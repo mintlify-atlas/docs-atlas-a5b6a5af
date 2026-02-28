@@ -1,0 +1,486 @@
+---
+title: "Opportunities API"
+description: "API endpoints for managing opportunities including hackathons, grants, competitions, and ideathons"
+---
+
+The Opportunities API allows you to create, retrieve, update, and delete opportunity listings on FTB Hustle.
+
+## Authentication
+
+All Opportunities API endpoints require authentication. Users must be logged in to access these endpoints.
+
+### User Roles
+
+- **user**: Regular users can create opportunities that require admin approval before being published
+- **member**: Members can create opportunities that are published immediately
+- **admin**: Admins can create, edit, and delete any opportunity, and view all opportunities including pending ones
+
+## List Opportunities
+
+<CodeGroup>
+```bash GET /api/opportunities
+curl -X GET "https://ftbhustle.com/api/opportunities?limit=10&offset=0" \
+  -H "Cookie: session=YOUR_SESSION_TOKEN"
+```
+</CodeGroup>
+
+Retrieve a paginated list of opportunities with optional filtering and search.
+
+### Query Parameters
+
+<ParamField query="limit" type="number" default="10">
+  Number of opportunities to return (1-50)
+</ParamField>
+
+<ParamField query="offset" type="number" default="0">
+  Number of opportunities to skip for pagination
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search term to filter opportunities by title or description
+</ParamField>
+
+<ParamField query="types" type="string">
+  Comma-separated list of opportunity types to filter by (hackathon, grant, competition, ideathon)
+</ParamField>
+
+<ParamField query="tags" type="string">
+  Comma-separated list of tags to filter by (case-insensitive)
+</ParamField>
+
+<ParamField query="ids" type="string">
+  Comma-separated list of opportunity IDs to retrieve specific opportunities
+</ParamField>
+
+<ParamField query="includeTotal" type="boolean" default="false">
+  Whether to include an accurate total count in the response
+</ParamField>
+
+### Response
+
+<ResponseField name="success" type="boolean">
+  Indicates if the request was successful
+</ResponseField>
+
+<ResponseField name="opportunities" type="array">
+  Array of opportunity objects
+  
+  <Expandable title="Opportunity Object">
+    <ResponseField name="id" type="string">
+      Unique identifier for the opportunity
+    </ResponseField>
+    
+    <ResponseField name="type" type="string">
+      Type of opportunity: `hackathon`, `grant`, `competition`, or `ideathon`
+    </ResponseField>
+    
+    <ResponseField name="title" type="string">
+      Opportunity title
+    </ResponseField>
+    
+    <ResponseField name="description" type="string">
+      Detailed description of the opportunity
+    </ResponseField>
+    
+    <ResponseField name="images" type="array">
+      Array of image URLs
+    </ResponseField>
+    
+    <ResponseField name="tags" type="array">
+      Array of tag strings
+    </ResponseField>
+    
+    <ResponseField name="location" type="string">
+      Location of the opportunity
+    </ResponseField>
+    
+    <ResponseField name="organiserInfo" type="string">
+      Information about the organizer
+    </ResponseField>
+    
+    <ResponseField name="startDate" type="string">
+      Start date in YYYY-MM-DD format
+    </ResponseField>
+    
+    <ResponseField name="endDate" type="string">
+      End date in YYYY-MM-DD format
+    </ResponseField>
+    
+    <ResponseField name="publishAt" type="string">
+      Scheduled publish date/time (ISO 8601 format)
+    </ResponseField>
+    
+    <ResponseField name="isVerified" type="boolean">
+      Whether the opportunity has been verified
+    </ResponseField>
+    
+    <ResponseField name="isActive" type="boolean">
+      Whether the opportunity is active and visible to non-admin users
+    </ResponseField>
+    
+    <ResponseField name="isFlagged" type="boolean">
+      Whether the opportunity has been flagged for review
+    </ResponseField>
+    
+    <ResponseField name="upvoteCount" type="number">
+      Number of upvotes
+    </ResponseField>
+    
+    <ResponseField name="userHasUpvoted" type="boolean">
+      Whether the current user has upvoted this opportunity
+    </ResponseField>
+    
+    <ResponseField name="userId" type="string">
+      ID of the user who created the opportunity
+    </ResponseField>
+    
+    <ResponseField name="user" type="object">
+      User information
+      
+      <Expandable title="User Object">
+        <ResponseField name="id" type="string">
+          User ID
+        </ResponseField>
+        <ResponseField name="name" type="string">
+          User name
+        </ResponseField>
+        <ResponseField name="image" type="string">
+          User profile image URL
+        </ResponseField>
+        <ResponseField name="role" type="string">
+          User role (user, member, admin)
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="createdAt" type="string">
+      Creation timestamp (ISO 8601 format)
+    </ResponseField>
+    
+    <ResponseField name="updatedAt" type="string">
+      Last update timestamp (ISO 8601 format)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  Pagination metadata
+  
+  <Expandable title="Pagination Object">
+    <ResponseField name="limit" type="number">
+      Number of items per page
+    </ResponseField>
+    
+    <ResponseField name="offset" type="number">
+      Current offset
+    </ResponseField>
+    
+    <ResponseField name="total" type="number">
+      Total number of opportunities (approximate unless includeTotal=true)
+    </ResponseField>
+    
+    <ResponseField name="hasMore" type="boolean">
+      Whether there are more opportunities to fetch
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "success": true,
+  "opportunities": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "type": "hackathon",
+      "title": "Tech Innovation Hackathon 2024",
+      "description": "Join us for a 48-hour hackathon focused on AI and sustainability",
+      "images": ["https://example.com/image1.jpg"],
+      "tags": ["AI", "Sustainability", "Innovation"],
+      "location": "San Francisco, CA",
+      "organiserInfo": "TechCorp",
+      "startDate": "2024-06-15",
+      "endDate": "2024-06-17",
+      "publishAt": null,
+      "isVerified": true,
+      "isActive": true,
+      "isFlagged": false,
+      "upvoteCount": 42,
+      "userHasUpvoted": false,
+      "userId": "user123",
+      "user": {
+        "id": "user123",
+        "name": "John Doe",
+        "image": "https://example.com/avatar.jpg",
+        "role": "member"
+      },
+      "createdAt": "2024-03-01T10:00:00Z",
+      "updatedAt": "2024-03-01T10:00:00Z"
+    }
+  ],
+  "pagination": {
+    "limit": 10,
+    "offset": 0,
+    "total": 156,
+    "hasMore": true
+  }
+}
+```
+</ResponseExample>
+
+## Create Opportunity
+
+<CodeGroup>
+```bash POST /api/opportunities
+curl -X POST "https://ftbhustle.com/api/opportunities" \
+  -H "Cookie: session=YOUR_SESSION_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "hackathon",
+    "title": "AI Hackathon 2024",
+    "description": "Build innovative AI solutions",
+    "tags": ["AI", "Machine Learning"],
+    "location": "New York, NY",
+    "startDate": "2024-07-01",
+    "endDate": "2024-07-03"
+  }'
+```
+</CodeGroup>
+
+Create a new opportunity listing.
+
+### Request Body
+
+<ParamField body="type" type="string" required>
+  Type of opportunity. Must be one of: `hackathon`, `grant`, `competition`, `ideathon`
+</ParamField>
+
+<ParamField body="title" type="string" required>
+  Opportunity title (minimum 1 character)
+</ParamField>
+
+<ParamField body="description" type="string" required>
+  Detailed description (minimum 1 character)
+</ParamField>
+
+<ParamField body="images" type="array">
+  Array of image URL strings
+</ParamField>
+
+<ParamField body="tags" type="array">
+  Array of tag strings for categorization
+</ParamField>
+
+<ParamField body="location" type="string">
+  Location of the opportunity
+</ParamField>
+
+<ParamField body="organiserInfo" type="string">
+  Information about the organizer
+</ParamField>
+
+<ParamField body="startDate" type="string">
+  Start date (ISO 8601 format or YYYY-MM-DD)
+</ParamField>
+
+<ParamField body="endDate" type="string">
+  End date (ISO 8601 format or YYYY-MM-DD)
+</ParamField>
+
+<ParamField body="publishAt" type="string">
+  Scheduled publish date/time (ISO 8601 format). Pass empty string or null to publish immediately
+</ParamField>
+
+### Response
+
+<ResponseField name="success" type="boolean">
+  Indicates if the opportunity was created successfully
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  The created opportunity object
+</ResponseField>
+
+<ResponseField name="userRole" type="string">
+  The role of the user who created the opportunity
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "success": true,
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "type": "hackathon",
+    "title": "AI Hackathon 2024",
+    "description": "Build innovative AI solutions",
+    "images": [],
+    "tagIds": ["tag-id-1", "tag-id-2"],
+    "location": "New York, NY",
+    "organiserInfo": null,
+    "startDate": "2024-07-01",
+    "endDate": "2024-07-03",
+    "publishAt": null,
+    "isFlagged": false,
+    "isVerified": false,
+    "isActive": false,
+    "upvoteCount": 0,
+    "upvoterIds": [],
+    "userId": "user123",
+    "createdAt": "2024-03-15T14:30:00Z",
+    "updatedAt": "2024-03-15T14:30:00Z",
+    "deletedAt": null
+  },
+  "userRole": "user"
+}
+```
+</ResponseExample>
+
+## Update Opportunity
+
+<CodeGroup>
+```bash PUT /api/opportunities/{id}
+curl -X PUT "https://ftbhustle.com/api/opportunities/550e8400-e29b-41d4-a716-446655440000" \
+  -H "Cookie: session=YOUR_SESSION_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Updated AI Hackathon 2024",
+    "location": "San Francisco, CA"
+  }'
+```
+</CodeGroup>
+
+Update an existing opportunity. Only the opportunity owner can update their own opportunities.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the opportunity to update
+</ParamField>
+
+### Request Body
+
+All fields are optional. Only provided fields will be updated.
+
+<ParamField body="type" type="string">
+  Type of opportunity: `hackathon`, `grant`, `competition`, or `ideathon`
+</ParamField>
+
+<ParamField body="title" type="string">
+  Opportunity title
+</ParamField>
+
+<ParamField body="description" type="string">
+  Detailed description
+</ParamField>
+
+<ParamField body="images" type="array">
+  Array of image URLs
+</ParamField>
+
+<ParamField body="tags" type="array">
+  Array of tag strings
+</ParamField>
+
+<ParamField body="location" type="string">
+  Location
+</ParamField>
+
+<ParamField body="organiserInfo" type="string">
+  Organizer information
+</ParamField>
+
+<ParamField body="startDate" type="string">
+  Start date
+</ParamField>
+
+<ParamField body="endDate" type="string">
+  End date
+</ParamField>
+
+<ParamField body="publishAt" type="string">
+  Scheduled publish date/time
+</ParamField>
+
+### Response
+
+<ResponseField name="success" type="boolean">
+  Indicates if the update was successful
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  The updated opportunity object
+</ResponseField>
+
+### Error Responses
+
+<ResponseField name="error" type="string">
+  Error message
+</ResponseField>
+
+- **401 Unauthorized**: User is not authenticated
+- **403 Forbidden**: User doesn't have permission to edit this opportunity
+- **404 Not Found**: Opportunity not found
+- **400 Bad Request**: Validation error
+
+## Delete Opportunity
+
+<CodeGroup>
+```bash DELETE /api/opportunities/{id}
+curl -X DELETE "https://ftbhustle.com/api/opportunities/550e8400-e29b-41d4-a716-446655440000" \
+  -H "Cookie: session=YOUR_SESSION_TOKEN"
+```
+</CodeGroup>
+
+Soft delete an opportunity. Only the opportunity owner can delete their own opportunities.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the opportunity to delete
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "message": "Opportunity deleted successfully"
+}
+```
+</ResponseExample>
+
+### Error Responses
+
+- **401 Unauthorized**: User is not authenticated
+- **403 Forbidden**: User doesn't have permission to delete this opportunity
+- **404 Not Found**: Opportunity not found
+
+## Error Handling
+
+All API endpoints return appropriate HTTP status codes and error messages:
+
+```json Error Response Example
+{
+  "error": "Validation error message"
+}
+```
+
+For validation errors from Zod:
+
+```json Validation Error Response
+{
+  "error": [
+    {
+      "code": "too_small",
+      "minimum": 1,
+      "path": ["title"],
+      "message": "Title is required"
+    }
+  ]
+}
+```

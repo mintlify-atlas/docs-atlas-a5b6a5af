@@ -1,0 +1,372 @@
+---
+title: Content Management
+description: Manage opportunities, internships, toolkits, users, and Ungatekeep posts from the admin panel
+---
+
+## Overview
+
+The Content Management section of the admin panel allows you to moderate user-submitted content, manage user accounts, control the toolkit catalog, and publish Ungatekeep posts.
+
+## Opportunities Management
+
+### What are Opportunities?
+
+Opportunities are user-submitted events like hackathons, grants, competitions, and ideathons. New opportunities require admin approval before appearing on the platform.
+
+### Pending Opportunities Tab
+
+The **Pending Opportunities** tab shows all opportunities awaiting admin review.
+
+#### Opportunity Information Displayed
+
+<CardGroup cols={2}>
+  <Card title="Basic Info" icon="info">
+    - Title and description
+    - Location
+    - Opportunity type (hackathon, grant, competition, ideathon)
+  </Card>
+  <Card title="Metadata" icon="calendar">
+    - Start and end dates
+    - Posted by (user name and role)
+    - Created date
+  </Card>
+</CardGroup>
+
+### Approving Opportunities
+
+When you approve an opportunity:
+
+<Steps>
+  <Step title="Review the Details">
+    Check the title, description, dates, and organizer information for accuracy
+  </Step>
+  <Step title="Click Approve">
+    Click the green **Approve** button with checkmark icon
+  </Step>
+  <Step title="Opportunity Goes Live">
+    The opportunity is marked as `isVerified: true` and `isActive: true`, making it visible to all users
+  </Step>
+</Steps>
+
+### Rejecting Opportunities
+
+To reject an opportunity that doesn't meet guidelines:
+
+<Steps>
+  <Step title="Review the Content">
+    Identify issues like spam, inappropriate content, or misleading information
+  </Step>
+  <Step title="Click Reject">
+    Click the red **Reject** button with X icon
+  </Step>
+  <Step title="Opportunity Hidden">
+    The opportunity is marked as `isActive: false` and removed from pending queue
+  </Step>
+</Steps>
+
+<Warning>
+Rejected opportunities are not deleted from the database, but they become inactive and won't appear in user feeds. Consider communicating rejection reasons to users via other channels.
+</Warning>
+
+### API Endpoint
+
+```bash
+PATCH /api/admin/opportunities/[id]
+# Body: { "action": "approve" | "reject" }
+```
+
+## User Management
+
+### User Management Tab
+
+The **User Management** tab displays all registered users and allows role assignment.
+
+#### User Information Displayed
+
+- **Profile**: Name, avatar, email address
+- **Role**: Current role badge (user, member, admin)
+- **Status**: Email verification status
+- **Joined Date**: Account creation date
+
+### Managing User Roles
+
+You can change any user's role using the dropdown in the Actions column.
+
+<CardGroup cols={3}>
+  <Card title="User → Member" icon="arrow-up">
+    Grant enhanced permissions for trusted community members
+  </Card>
+  <Card title="Member → Admin" icon="shield-check">
+    Promote to full admin access for platform management
+  </Card>
+  <Card title="Admin → User" icon="arrow-down">
+    Demote admins or members back to regular user role
+  </Card>
+</CardGroup>
+
+### Changing a User's Role
+
+<Steps>
+  <Step title="Locate the User">
+    Use the search bar to filter users by name
+  </Step>
+  <Step title="Select New Role">
+    Open the dropdown in the Actions column and select the new role
+  </Step>
+  <Step title="Confirm Change">
+    The role updates immediately and the user's permissions change on next page load
+  </Step>
+</Steps>
+
+<Note>
+You cannot change your own role. The role dropdown is disabled for the currently logged-in admin to prevent accidental self-demotion.
+</Note>
+
+### API Endpoint
+
+```bash
+PATCH /api/admin/users/[id]
+# Body: { "role": "user" | "member" | "admin" }
+```
+
+## Toolkit Management
+
+### Toolkit Management Tab
+
+The **Toolkit Management** tab lets you create, edit, and manage paid educational toolkits.
+
+#### Toolkit Information Displayed
+
+<CardGroup cols={2}>
+  <Card title="Catalog Info" icon="book">
+    - Title and description
+    - Category (Career, Skills, etc.)
+    - Price and original price (for discounts)
+    - Lesson count
+  </Card>
+  <Card title="Status Controls" icon="toggle-on">
+    - Active/Inactive toggle
+    - Sale badge toggle
+    - Published status
+  </Card>
+</CardGroup>
+
+### Creating a New Toolkit
+
+<Steps>
+  <Step title="Click Create Toolkit">
+    Click the **Create Toolkit** button in the top right
+  </Step>
+  <Step title="Fill in Details">
+    Enter title, description, price, category, and highlights
+  </Step>
+  <Step title="Add Media">
+    Upload cover image URL and optional promo video URL
+  </Step>
+  <Step title="Save Toolkit">
+    Click **Create** to add the toolkit to the catalog
+  </Step>
+</Steps>
+
+### Managing Toolkit Content
+
+Each toolkit can contain multiple lessons (content items):
+
+1. Click the **folder icon** in the Actions column
+2. The Content Manager dialog opens
+3. Add **Article** or **Video** content items
+4. Set the order using the `orderIndex` field
+5. Each item has a title, type, and content (HTML for articles, Bunny CDN URL for videos)
+
+<Note>
+Toolkit content items are stored in the `toolkit_content_items` table and linked to toolkits via `toolkitId`.
+</Note>
+
+### Activating/Deactivating Toolkits
+
+- **Active Toggle**: Controls whether the toolkit appears in the marketplace
+- **Sale Badge Toggle**: Shows/hides a "Sale" badge on the toolkit card
+
+### Editing a Toolkit
+
+<Steps>
+  <Step title="Click Edit Icon">
+    Click the **Edit** button (pencil icon) in the Actions column
+  </Step>
+  <Step title="Modify Fields">
+    Update title, description, price, highlights, or other fields
+  </Step>
+  <Step title="Save Changes">
+    Click **Update Toolkit** to save changes
+  </Step>
+</Steps>
+
+### Deleting a Toolkit
+
+<Warning>
+Deleting a toolkit is permanent and will remove all associated content items. Users who have purchased the toolkit will lose access.
+</Warning>
+
+<Steps>
+  <Step title="Click Delete Icon">
+    Click the trash icon in the Actions column
+  </Step>
+  <Step title="Confirm Deletion">
+    Confirm the deletion in the browser prompt
+  </Step>
+  <Step title="Toolkit Removed">
+    The toolkit and all its content are permanently deleted
+  </Step>
+</Steps>
+
+### API Endpoints
+
+```bash
+# Get all toolkits
+GET /api/admin/toolkits
+
+# Create a toolkit
+POST /api/admin/toolkits
+
+# Update a toolkit
+PUT /api/admin/toolkits/[id]
+
+# Delete a toolkit
+DELETE /api/admin/toolkits/[id]
+
+# Get toolkit content items
+GET /api/admin/toolkits/[id]/content
+
+# Manage content items
+POST /api/admin/toolkit-content-items
+PATCH /api/admin/toolkit-content-items/[id]
+DELETE /api/admin/toolkit-content-items/[id]
+```
+
+## Ungatekeep Posts
+
+### Ungatekeep Tab
+
+The **Ungatekeep** section manages broadcast posts for announcements, resources, and company experiences.
+
+#### Post Types
+
+<CardGroup cols={3}>
+  <Card title="Announcements" icon="megaphone">
+    Platform updates, events, and important notices
+  </Card>
+  <Card title="Company Experience" icon="briefcase">
+    User stories about interviews, internships, and work culture
+  </Card>
+  <Card title="Resources" icon="book-open">
+    Helpful guides, templates, and learning materials
+  </Card>
+</CardGroup>
+
+### Creating an Ungatekeep Post
+
+<Steps>
+  <Step title="Click Create Post">
+    Click the **Create Post** button
+  </Step>
+  <Step title="Enter Content">
+    Add title, content (Markdown supported), and select a tag
+  </Step>
+  <Step title="Add Media (Optional)">
+    Upload images or add link previews (URL, title, image)
+  </Step>
+  <Step title="Set Publishing Options">
+    Toggle **Published** to make it live, or save as draft
+    Toggle **Pinned** to feature the post at the top
+  </Step>
+  <Step title="Save Post">
+    Click **Create** to publish or save as draft
+  </Step>
+</Steps>
+
+### Post Controls
+
+#### Published Toggle
+- **ON**: Post is visible to all users in the Ungatekeep feed
+- **OFF**: Post is saved as a draft and not visible publicly
+
+#### Pinned Toggle
+- **ON**: Post appears at the top of the feed
+- **OFF**: Post appears in chronological order
+
+### Editing Posts
+
+<Steps>
+  <Step title="Click Edit Icon">
+    Click the edit button in the Actions column
+  </Step>
+  <Step title="Modify Content">
+    Update title, content, tag, images, or link preview
+  </Step>
+  <Step title="Save Changes">
+    Click **Update** to save changes
+  </Step>
+</Steps>
+
+### Deleting Posts
+
+<Warning>
+Deleting an Ungatekeep post is permanent. Users will no longer see the post in the feed.
+</Warning>
+
+<Steps>
+  <Step title="Click Delete Icon">
+    Click the trash icon in the Actions column
+  </Step>
+  <Step title="Confirm Deletion">
+    Confirm the deletion in the browser prompt
+  </Step>
+  <Step title="Post Removed">
+    The post is permanently deleted from the database
+  </Step>
+</Steps>
+
+### API Endpoints
+
+```bash
+# Get all posts
+GET /api/admin/ungatekeep
+
+# Create a post
+POST /api/admin/ungatekeep
+
+# Update a post
+PUT /api/admin/ungatekeep/[id]
+
+# Delete a post
+DELETE /api/admin/ungatekeep/[id]
+```
+
+## Search and Filtering
+
+All admin tables include search functionality:
+
+- **Users**: Search by name
+- **Opportunities**: Search by title
+- **Toolkits**: Search by title
+- **Ungatekeep**: Search by title
+- **Coupons**: Search by code (covered in [Coupon System](/admin/coupon-system))
+
+## Source Code Locations
+
+```bash
+# Admin table components
+app/admin/AdminUsersTable.tsx
+app/admin/AdminOpportunitiesTable.tsx
+app/admin/AdminToolkitsTable.tsx
+app/admin/AdminUngatekeepTable.tsx
+
+# API routes
+app/api/admin/users/
+app/api/admin/opportunities/
+app/api/admin/toolkits/
+app/api/admin/ungatekeep/
+
+# Database schema
+lib/schema.ts
+```

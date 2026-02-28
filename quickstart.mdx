@@ -1,80 +1,450 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart Guide
+description: Get started with FTB Hustle in under 5 minutes - from account creation to discovering and bookmarking your first opportunity.
 ---
 
-## Get started in three steps
+# Quickstart Guide
 
-Get your documentation site running locally and make your first customization.
-
-### Step 1: Set up your local environment
-
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+This guide will take you from zero to bookmarking your first opportunity in under 5 minutes.
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  **What you'll accomplish:**
+  - Create your FTB Hustle account
+  - Complete personalized onboarding
+  - Discover and explore opportunities
+  - Bookmark your first opportunity
+  - Access the application tracker
 </Note>
+
+## Prerequisites
+
+Before you begin, make sure you have:
+- A valid email address
+- Access to a Google or LinkedIn account (optional, for OAuth)
+- A few minutes to complete onboarding
+
+<Warning>
+  You must verify your email address if you sign up with email/password. Check your inbox for the verification email.
+</Warning>
+
+## Step 1: Create Your Account
+
+Visit [ftbhustle.com](https://ftbhustle.com) and click **Get Started** or navigate to `/login`.
+
+### Sign Up Options
+
+You have three ways to create an account:
+
+<Tabs>
+  <Tab title="Google OAuth">
+    **Recommended:** Sign up with Google for instant access.
+
+    ```typescript
+    // OAuth flow redirects you automatically
+    const signInWithGoogle = async () => {
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/opportunities",
+        newUserCallbackURL: "/onboarding"
+      });
+    };
+    ```
+
+    <Steps>
+      <Step title="Click 'Login with Google'">
+        You'll be redirected to Google's secure login page.
+      </Step>
+      <Step title="Authorize FTB Hustle">
+        Grant permission for FTB Hustle to access your basic profile info.
+      </Step>
+      <Step title="Complete Onboarding">
+        New users are automatically redirected to `/onboarding` to set up their profile.
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="LinkedIn OAuth">
+    Sign up with LinkedIn to import your professional profile.
+
+    ```typescript
+    const signInWithLinkedIn = async () => {
+      await authClient.signIn.social({
+        provider: "linkedin",
+        callbackURL: "/opportunities",
+        newUserCallbackURL: "/onboarding"
+      });
+    };
+    ```
+
+    <Steps>
+      <Step title="Click 'Login with LinkedIn'">
+        You'll be redirected to LinkedIn's secure login page.
+      </Step>
+      <Step title="Authorize FTB Hustle">
+        Grant permission for FTB Hustle to access your profile.
+      </Step>
+      <Step title="Complete Onboarding">
+        New users are redirected to onboarding automatically.
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="Email & Password">
+    Create an account with your email and password.
+
+    ```typescript
+    // Sign up with email validation
+    const formSchema = z.object({
+      username: z.string().min(3),
+      email: z.string().email(),
+      password: z.string().min(8)
+    });
+
+    await authClient.signUp.email({
+      email: values.email,
+      password: values.password,
+      name: values.username,
+      callbackURL: "/dashboard"
+    });
+    ```
+
+    <Steps>
+      <Step title="Fill in the form">
+        Provide a username (min 3 characters), email, and password (min 8 characters).
+      </Step>
+      <Step title="Verify your email">
+        Check your inbox for a verification email. Click the link to verify.
+      </Step>
+      <Step title="Complete Onboarding">
+        After verification, you'll be redirected to onboarding.
+      </Step>
+    </Steps>
+
+    <Warning>
+      Email verification is required. You won't be able to log in until you verify your email address.
+    </Warning>
+  </Tab>
+</Tabs>
+
+## Step 2: Complete Onboarding
+
+After creating your account, you'll land on the onboarding page at `/onboarding`. This takes about 60 seconds and helps us personalize your feed.
+
+<img
+  className="block"
+  src="/images/onboarding.png"
+  alt="Onboarding Flow"
+/>
+
+### Quest 1: Pick Your Path
+
+Choose your role on the platform:
+
+<CardGroup cols={2}>
+  <Card title="Student" icon="user">
+    You're here to find opportunities and get unstuck. The platform is optimized for you.
+  </Card>
+  <Card title="Society Member" icon="users">
+    You share opportunities and run events for students. You can still browse everything.
+  </Card>
+</CardGroup>
+
+```typescript
+// The role you select shapes your entire experience
+type Role = "student" | "society";
+
+const handleRoleSelect = (role: Role) => {
+  setAnswers(prev => ({
+    ...prev,
+    role,
+    // Society path keeps it light - no required education fields
+    educationLevel: role === "student" ? prev.educationLevel : "",
+    fieldOfStudy: role === "student" ? prev.fieldOfStudy : ""
+  }));
+};
+```
+
+<Note>
+  **Everything is optional except your role.** You can skip any field and update your profile later.
+</Note>
+
+### Quest 2: Quick Basics (Optional)
+
+Provide optional information to tune your feed:
+
+- **Location:** State or city (helps show nearby events)
+- **Education Level:** High School, Undergraduate, Postgraduate, PhD, or Other
+- **Field of Study:** Engineering, Business, Design, Data Science, or Other
+
+```typescript
+// Location helps surface local opportunities
+const answers = {
+  state: "Maharashtra",  // Optional: state selection
+  city: "Pune",          // Optional: or specific city
+  educationLevel: "Undergraduate",
+  fieldOfStudy: "Computer Science"
+};
+```
+
+### Quest 3: What Should We Prioritize?
+
+Select opportunity types you're interested in:
+
+<Tabs>
+  <Tab title="Opportunity Interests">
+    Choose what you want right now:
+    - Internships
+    - Hackathons
+    - Scholarships
+    - Competitions
+    - Grants
+    - Fellowships
+    - Conferences
+  </Tab>
+  <Tab title="Domain Preferences">
+    Pick topics you like:
+    - AI/ML
+    - Web Development
+    - Mobile Development
+    - Product Management
+    - UI/UX Design
+    - Data Science
+    - Blockchain
+    - Game Development
+  </Tab>
+</Tabs>
+
+```typescript
+// Multi-select - pick as many as you want
+const interests = {
+  opportunities: ["Internships", "Hackathons", "Scholarships"],
+  domains: ["AI/ML", "Web Development", "Product Management"]
+};
+```
+
+### Quest 4: You're Set
+
+Review your selections and click **Start** to complete onboarding.
+
+<Steps>
+  <Step title="Review your profile summary">
+    Check the live preview on the right side showing all your selections.
+  </Step>
+  <Step title="Click 'Start'">
+    Your preferences are saved automatically to your profile.
+  </Step>
+  <Step title="Redirected to /opportunities">
+    You'll land on your personalized opportunity feed.
+  </Step>
+</Steps>
+
+```typescript
+// Your profile is saved on completion
+await saveProfile.mutateAsync({
+  persona: answers.role,
+  locationType: answers.state ? "state" : "city",
+  locationValue: answers.state || answers.city,
+  educationLevel: answers.educationLevel,
+  fieldOfStudy: answers.fieldOfStudy,
+  opportunityInterests: answers.opportunities,
+  domainPreferences: answers.domains
+});
+
+// Then redirect to opportunities
+router.push("/opportunities");
+```
+
+## Step 3: Discover Opportunities
+
+You're now on the opportunities page at `/opportunities`. This is your personalized feed.
+
+<img
+  className="block"
+  src="/images/opportunities.png"
+  alt="Opportunities Feed"
+/>
+
+### Explore the Feed
+
+The feed shows opportunities tailored to your profile:
+
+<Tabs>
+  <Tab title="Filter by Type">
+    Click the filter dropdown to show specific types:
+    - All Opportunities
+    - Hackathons
+    - Internships
+    - Scholarships
+    - Grants
+    - Competitions
+  </Tab>
+  <Tab title="Filter by Tags">
+    Click tags to filter by domains:
+    - Engineering
+    - Design
+    - Product
+    - AI/ML
+    - Web Dev
+    - And more...
+  </Tab>
+  <Tab title="Sort by Date">
+    Sort opportunities by:
+    - Newest first (default)
+    - Ending soon (by deadline)
+    - Most upvoted
+  </Tab>
+</Tabs>
+
+### Understanding Opportunity Cards
+
+Each opportunity card shows:
+- **Image Gallery:** Visual preview (swipe for more)
+- **Title & Organization:** Who's hosting the opportunity
+- **Type Badge:** Hackathon, Internship, Scholarship, etc.
+- **Description:** What it's about and why it matters
+- **Tags:** Related domains and topics
+- **Dates:** Start date and deadline
+- **Location:** Where it's happening (online/offline)
+- **Actions:** Bookmark, upvote, comment, share
+
+## Step 4: Bookmark Your First Opportunity
+
+Found something interesting? Let's bookmark it.
+
+<Steps>
+  <Step title="Find an opportunity you like">
+    Scroll through your feed and click on an opportunity card to expand details.
+  </Step>
+  <Step title="Click the bookmark icon">
+    Look for the bookmark icon in the actions bar at the bottom of the card.
+  </Step>
+  <Step title="Confirm it's bookmarked">
+    You'll see a success toast: "Added to bookmarks" and the icon will fill in.
+  </Step>
+  <Step title="Access your tracker">
+    Navigate to `/tracker` to see all your bookmarked opportunities.
+  </Step>
+</Steps>
+
+### How Bookmarking Works
+
+```typescript
+// Clicking bookmark adds to tracker
+const handleBookmarkChange = async (id: string, newState: boolean) => {
+  if (!session?.user?.id) {
+    toast.error("Please log in to bookmark opportunities");
+    return;
+  }
+
+  if (newState) {
+    // Add to tracker
+    addToTracker({
+      id,
+      opportunityId: id,
+      title: opportunity.title,
+      company: opportunity.organiserInfo,
+      type: opportunity.type,
+      deadline: opportunity.endDate,
+      kind: "opportunity"
+    }, "Not Applied", "opportunity");
+  } else {
+    // Remove from tracker
+    removeFromTracker(id);
+  }
+
+  toast.success(
+    newState ? "Added to bookmarks" : "Removed from bookmarks"
+  );
+};
+```
+
+<Note>
+  Bookmarks are stored in the database and synced across devices. You can access them from anywhere.
+</Note>
+
+## Step 5: Use the Application Tracker
+
+Navigate to `/tracker` to manage your bookmarked opportunities.
+
+<img
+  className="block"
+  src="/images/tracker.png"
+  alt="Application Tracker"
+/>
+
+### Tracker Features
+
+<CardGroup cols={2}>
+  <Card title="Status Management" icon="list-check">
+    Update application status: Not Applied, Applied, Interview, Offer, Rejected.
+  </Card>
+  <Card title="Notes & Reminders" icon="note-sticky">
+    Add custom notes for each opportunity. Set reminders for deadlines.
+  </Card>
+  <Card title="Calendar Sync" icon="calendar">
+    View all deadlines in calendar view. Never miss an important date.
+  </Card>
+  <Card title="Details Modal" icon="window-maximize">
+    Click any opportunity to view full details, add notes, and update status.
+  </Card>
+</CardGroup>
+
+### Updating Application Status
+
+```typescript
+// Track your progress through the application process
+type ApplicationStatus = 
+  | "Not Applied"
+  | "Applied" 
+  | "Interview"
+  | "Offer"
+  | "Rejected";
+
+// Update status from the tracker
+const updateStatus = async (id: string, status: ApplicationStatus) => {
+  await fetch(`/api/tracker/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status })
+  });
+};
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Explore Toolkits" icon="graduation-cap" href="/toolkit">
+    Access curated learning resources to level up your skills.
+  </Card>
+  <Card title="Check Ungatekeep" icon="lightbulb" href="/ungatekeep">
+    Browse insider tips, templates, and resources shared by the community.
+  </Card>
+  <Card title="Customize Profile" icon="user-gear" href="/profile">
+    Update your interests, education, and location preferences anytime.
+  </Card>
+  <Card title="Browse Internships" icon="briefcase" href="/internships">
+    Dedicated page for discovering internship opportunities.
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="I didn't receive the verification email">
+    Check your spam folder. If it's not there, go to `/login` and click "Forgot your password?" to request a new verification email.
+  </Accordion>
+  <Accordion title="I can't bookmark opportunities">
+    Make sure you're logged in. If the issue persists, try refreshing the page or clearing your browser cache.
+  </Accordion>
+  <Accordion title="My feed is empty">
+    Try adjusting your filters or updating your profile interests at `/profile`. New opportunities are added regularly.
+  </Accordion>
+  <Accordion title="OAuth login isn't working">
+    Ensure you're using a supported browser (Chrome, Firefox, Safari, Edge). Check that pop-ups aren't blocked.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+Congratulations! You've completed the quickstart. You're now ready to discover opportunities, track applications, and level up your career.
+
+Questions? Check out the [Authentication Guide](/authentication) or reach out via the feedback widget.

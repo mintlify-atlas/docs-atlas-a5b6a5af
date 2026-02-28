@@ -1,0 +1,391 @@
+---
+title: Tracker
+description: Manage internship and opportunity applications with deadline tracking and progress insights
+---
+
+## Overview
+
+The Tracker is your personal application management system. Save internships and opportunities, update application statuses, track deadlines, and analyze your success rate - all in one centralized dashboard.
+
+<CardGroup cols={2}>
+  <Card title="Unified Dashboard" icon="gauge">
+    Manage internships and opportunities in separate tabs
+  </Card>
+  <Card title="Status Tracking" icon="list-check">
+    Update progress from "Not Applied" to "Selected"
+  </Card>
+  <Card title="Deadline Alerts" icon="bell">
+    Visual indicators for approaching deadlines
+  </Card>
+  <Card title="Success Analytics" icon="chart-line">
+    View metrics like success rate and action rate
+  </Card>
+</CardGroup>
+
+## Getting Started
+
+### Adding Items to Tracker
+
+There are three ways to add items:
+
+<Tabs>
+  <Tab title="From Internships">
+    1. Browse the Internships feed
+    2. Click the **Bookmark** icon on any internship card
+    3. The internship is automatically added with "Not Applied" status
+  </Tab>
+  
+  <Tab title="From Opportunities">
+    1. Browse the Opportunities feed
+    2. Click the **Bookmark** icon on any opportunity card
+    3. The opportunity is saved with "Not Applied" status
+  </Tab>
+  
+  <Tab title="Manual Entry">
+    Add external opportunities not listed on FTB Hustle:
+    1. Click "Add Manual Entry" (coming soon)
+    2. Fill in title, company, deadline, and link
+    3. Save to your tracker
+  </Tab>
+</Tabs>
+
+<Note>
+  You must be logged in to use the Tracker. All data is synced to your account and accessible across devices.
+</Note>
+
+## Tracker Interface
+
+### Tab Switcher
+
+Toggle between two views:
+
+- **Internships Tab**: Shows only saved internships
+- **Opportunities Tab**: Shows only saved opportunities (hackathons, grants, competitions, ideathons)
+
+The active tab is highlighted in white, and the URL updates to reflect your selection (e.g., `/tracker?tab=internship`).
+
+### Main List View
+
+<Tabs>
+  <Tab title="Desktop View">
+    **Table Format** with columns:
+    - **Title**: Internship/opportunity name (clickable to view details)
+    - **Company/Organizer**: Organization name
+    - **Location**: City or "Remote"
+    - **Deadline**: Application due date with countdown
+    - **Status**: Dropdown to update progress
+    - **Actions**: View details, delete from tracker
+    
+    **Features**:
+    - **Priority Highlighting**: Rows with deadlines within 7 days show a yellow/amber border
+    - **Sorting**: Automatically sorted by deadline (earliest first)
+    - **Hover Effects**: Row highlights on hover for easy reading
+  </Tab>
+  
+  <Tab title="Mobile View">
+    **Card Format** showing:
+    - Company logo or icon
+    - Title and organization
+    - Status badge and deadline countdown
+    - Quick actions (view, delete)
+    
+    **Compact Design**:
+    - Optimized for small screens
+    - Swipe gestures for actions (planned)
+    - Touch-friendly status dropdowns
+  </Tab>
+</Tabs>
+
+### Status Management
+
+Each tracked item has a status dropdown with the following options:
+
+<Steps>
+  <Step title="Not Applied">
+    **Initial State**: Item is saved but you haven't applied yet.
+    
+    **What to do**:
+    - Review the job description
+    - Prepare your resume and cover letter
+    - Set a reminder for the deadline
+  </Step>
+  
+  <Step title="Draft">
+    **Application in Progress**: You've started the application but haven't submitted.
+    
+    **What to do**:
+    - Complete application forms
+    - Upload documents
+    - Proofread before submitting
+  </Step>
+  
+  <Step title="Applied">
+    **Submitted**: You've sent your application.
+    
+    **What to do**:
+    - Note the application date
+    - Wait for a response (typically 1-2 weeks)
+    - Send a follow-up if needed
+  </Step>
+  
+  <Step title="Shortlisted">
+    **Under Review**: You've received an interview call or moved to the next round.
+    
+    **What to do**:
+    - Prepare for interviews
+    - Research the company
+    - Use FTB Hustle toolkits for interview prep
+  </Step>
+  
+  <Step title="Selected">
+    **Offer Received**: Congratulations! You got the internship/opportunity.
+    
+    **What to do**:
+    - Accept the offer
+    - Complete onboarding steps
+    - Update your LinkedIn profile
+  </Step>
+  
+  <Step title="Rejected">
+    **Not Selected**: Unfortunately, you didn't make it this time.
+    
+    **What to do**:
+    - Don't be discouraged - rejection is part of the process
+    - Request feedback (if possible)
+    - Apply to more opportunities
+    - Improve your resume using toolkits
+  </Step>
+</Steps>
+
+<Tip>
+  Update your status as soon as you make progress. This keeps your tracker accurate and provides better analytics.
+</Tip>
+
+## Tracking Insights
+
+Click **"Check Insights"** to expand the analytics panel:
+
+### Key Metrics
+
+<CardGroup cols={3}>
+  <Card title="Total Tracked" icon="bookmark">
+    Number of internships/opportunities you've saved
+    
+    **Formula**: Count of all items in current tab
+  </Card>
+  
+  <Card title="Success Rate" icon="trophy">
+    Percentage of applications that resulted in selection
+    
+    **Formula**: (Selected ÷ Total Applications) × 100
+    
+    **Example**: 3 selected out of 10 applied = 30% success rate
+  </Card>
+  
+  <Card title="Action Rate" icon="zap">
+    Percentage of saved items you've actually applied to
+    
+    **Formula**: (Applied + Shortlisted + Selected + Rejected) ÷ Total Tracked × 100
+    
+    **Example**: 8 applied out of 12 saved = 67% action rate
+  </Card>
+</CardGroup>
+
+<Info>
+  **Success Rate** only considers items with status "Applied" or beyond (excludes "Not Applied" and "Draft").
+</Info>
+
+### Mobile Insights View
+
+On mobile, insights are consolidated into a single card showing:
+- **Top row**: Total Tracked and Success Rate side-by-side
+- **Bottom section**: Action Rate in a highlighted box
+
+### Interpreting Your Metrics
+
+| Metric | Low | Good | Excellent |
+|--------|-----|------|----------|
+| **Success Rate** | < 10% | 10-25% | > 25% |
+| **Action Rate** | < 50% | 50-75% | > 75% |
+
+**Low Success Rate?** Consider:
+- Using FTB Hustle's Resume and Interview Prep toolkits
+- Applying to more positions that match your skills
+- Seeking feedback on your applications
+
+**Low Action Rate?** You're saving too many opportunities without applying. Focus on quality over quantity.
+
+## Deadline Management
+
+### Priority Indicators
+
+Deadlines are color-coded:
+
+- **Red/Amber Border**: Deadline within 7 days (high priority)
+- **Normal**: Deadline more than 7 days away
+- **Gray**: No deadline set or deadline passed
+
+### Sorting
+
+The tracker automatically sorts items by deadline:
+1. **Earliest deadlines first** (most urgent at the top)
+2. Items with no deadline appear at the bottom
+
+<Warning>
+  Items with approaching deadlines are pinned to the top. Review these daily to avoid missing opportunities!
+</Warning>
+
+### Integration with Calendar
+
+Your tracked items automatically appear in:
+
+- **Calendar Widget** (on Opportunities and Internships pages)
+- **Task Widget** showing upcoming deadlines as tasks
+
+## Taking Action
+
+### Viewing Details
+
+Click on any tracked item to:
+
+<Tabs>
+  <Tab title="Internships">
+    Redirects to `/intern/{id}` showing:
+    - Full job description
+    - Company information
+    - Application link
+    - Deadline and stipend details
+  </Tab>
+  
+  <Tab title="Opportunities">
+    Redirects to `/opportunities/{id}` showing:
+    - Event details and images
+    - Organizer information
+    - Comments from other users
+    - Upvote count
+  </Tab>
+</Tabs>
+
+### Deleting Items
+
+Remove items from your tracker:
+
+1. Click the **Delete/Trash** icon next to the item
+2. Confirm the deletion (optional confirmation dialog)
+3. The item is removed from your tracker (does not delete the original listing)
+
+<Note>
+  Deleting from the tracker does not affect the original internship/opportunity. Other users can still see and bookmark it.
+</Note>
+
+## Premium Toolkit Promotion
+
+At the top of the tracker, you'll see a **"10x Chances"** button:
+
+- Links to the Toolkits page
+- Promotes premium resources to improve your success rate
+- Includes courses on:
+  - Resume optimization
+  - Interview preparation
+  - LinkedIn profile building
+  - Salary negotiation
+
+<Tip>
+  Students who complete resume and interview toolkits report a **2-3x increase** in callback rates.
+</Tip>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Effective Tracking">
+    - **Update statuses immediately**: Don't let your tracker get outdated
+    - **Set realistic goals**: Aim for an 80%+ action rate (apply to 80% of saved items)
+    - **Review weekly**: Spend 10 minutes each week updating your tracker
+    - **Focus on deadlines**: Prioritize items with approaching deadlines
+    - **Delete irrelevant items**: If you're no longer interested, remove it to keep your tracker clean
+  </Accordion>
+  
+  <Accordion title="Improving Success Rate">
+    - **Quality over quantity**: Apply to roles you're genuinely qualified for
+    - **Tailor applications**: Customize your resume and cover letter for each role
+    - **Apply early**: Submit applications as soon as possible, not on the deadline
+    - **Follow up**: Send a polite follow-up email 1-2 weeks after applying
+    - **Learn from rejections**: Ask for feedback and identify areas to improve
+  </Accordion>
+  
+  <Accordion title="Staying Organized">
+    - **Use notes**: Add application passwords, portal links, or interviewer names (feature coming soon)
+    - **Set reminders**: Use the calendar widget to plan your application schedule
+    - **Separate tabs**: Keep internships and opportunities in different tabs for clarity
+    - **Regular cleanup**: Archive or delete old items once the deadline has passed
+  </Accordion>
+</AccordionGroup>
+
+## Advanced Features (Coming Soon)
+
+<CardGroup cols={2}>
+  <Card title="Notes & Comments" icon="sticky-note">
+    Add private notes to each tracked item:
+    - Application portal login details
+    - Interviewer names and questions asked
+    - Preparation materials
+  </Card>
+  
+  <Card title="Email Reminders" icon="envelope">
+    Automatic deadline reminders:
+    - 7 days before deadline
+    - 1 day before deadline
+    - Custom reminder settings
+  </Card>
+  
+  <Card title="Export Data" icon="download">
+    Download your tracker as CSV or PDF:
+    - Analyze trends in spreadsheets
+    - Share with mentors or career counselors
+  </Card>
+  
+  <Card title="Collaboration" icon="users">
+    Share your tracker with friends:
+    - Compare success rates
+    - Recommend opportunities to each other
+    - Study together for interviews
+  </Card>
+</CardGroup>
+
+## Frequently Asked Questions
+
+<AccordionGroup>
+  <Accordion title="Is my tracker data private?">
+    Yes! Your tracker is only visible to you. Other users cannot see what you've bookmarked or your application statuses.
+  </Accordion>
+  
+  <Accordion title="Can I access my tracker from multiple devices?">
+    Absolutely. Your tracker syncs across all devices where you're logged in. Updates on one device instantly appear on others.
+  </Accordion>
+  
+  <Accordion title="What happens if I delete an item by mistake?">
+    Currently, deletions are permanent. We recommend bookmarking the internship/opportunity again from the main feed. An "undo" feature is planned for future releases.
+  </Accordion>
+  
+  <Accordion title="Why is my success rate 0% even though I got selected?">
+    Ensure the status is set to "Selected" (not "Shortlisted"). Also, success rate only calculates from items with status "Applied" or beyond - if you haven't marked any as "Applied", the rate will be 0%.
+  </Accordion>
+  
+  <Accordion title="Can I track applications from other platforms?">
+    Yes, using Manual Entry (coming soon). This lets you add external internships/opportunities not listed on FTB Hustle.
+  </Accordion>
+</AccordionGroup>
+
+## Related Features
+
+<CardGroup cols={3}>
+  <Card title="Opportunities" icon="megaphone" href="/features/opportunities">
+    Discover hackathons, grants, and competitions to add to your tracker
+  </Card>
+  <Card title="Internships" icon="briefcase" href="/features/internships">
+    Browse curated internship listings to save and track
+  </Card>
+  <Card title="Toolkits" icon="book-open" href="/features/toolkits">
+    Learn skills to improve your success rate
+  </Card>
+</CardGroup>
